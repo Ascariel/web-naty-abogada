@@ -31,3 +31,10 @@ export function whatsappLink(message?: string): string {
   const text = encodeURIComponent(message ?? site.whatsappDefaultMessage);
   return `https://wa.me/${site.whatsappNumber}?text=${text}`;
 }
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+export function path(p: string): string {
+  if (!p.startsWith('/')) return p;
+  return BASE + p;
+}

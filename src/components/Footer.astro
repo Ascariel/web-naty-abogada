@@ -1,5 +1,5 @@
 ---
-import { site, whatsappLink } from '../data/site';
+import { site, whatsappLink, path } from '../data/site';
 const year = new Date().getFullYear();
 ---
 
@@ -15,12 +15,12 @@ const year = new Date().getFullYear();
     <div>
       <h4>Áreas de práctica</h4>
       <ul>
-        <li><a href="/areas-de-practica#pareja">Divorcios</a></li>
-        <li><a href="/areas-de-practica#hijos">Pensión de alimentos</a></li>
-        <li><a href="/areas-de-practica#hijos">Custodia y visitas</a></li>
-        <li><a href="/areas-de-practica#proteccion">Violencia intrafamiliar</a></li>
-        <li><a href="/areas-de-practica#otros">Recursos contra Isapres</a></li>
-        <li><a href="/areas-de-practica#otros">Registro de marcas (INAPI)</a></li>
+        <li><a href={path('/areas-de-practica#pareja')}>Divorcios</a></li>
+        <li><a href={path('/areas-de-practica#hijos')}>Pensión de alimentos</a></li>
+        <li><a href={path('/areas-de-practica#hijos')}>Custodia y visitas</a></li>
+        <li><a href={path('/areas-de-practica#proteccion')}>Violencia intrafamiliar</a></li>
+        <li><a href={path('/areas-de-practica#otros')}>Recursos contra Isapres</a></li>
+        <li><a href={path('/areas-de-practica#otros')}>Registro de marcas (INAPI)</a></li>
       </ul>
     </div>
 
@@ -29,15 +29,15 @@ const year = new Date().getFullYear();
       <ul>
         <li><a href={whatsappLink()} target="_blank" rel="noopener">WhatsApp</a></li>
         <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
-        <li><a href="/contacto">Formulario de contacto</a></li>
+        <li><a href={path('/contacto')}>Formulario de contacto</a></li>
       </ul>
     </div>
 
     <div>
       <h4>Información legal</h4>
       <ul>
-        <li><a href="/privacidad">Política de privacidad</a></li>
-        <li><a href="/contacto#disclaimer">Aviso legal</a></li>
+        <li><a href={path('/privacidad')}>Política de privacidad</a></li>
+        <li><a href={path('/contacto#disclaimer')}>Aviso legal</a></li>
       </ul>
     </div>
   </div>

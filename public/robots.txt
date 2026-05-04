@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nataliavallejos.cl/sitemap-index.xml
+Sitemap: https://ascariel.github.io/web-naty-abogada/sitemap-index.xml

@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { site, whatsappLink } from '../data/site';
+import { site, whatsappLink, path } from '../data/site';
 import { getFeaturedServices } from '../data/services';
 
 const featured = getFeaturedServices();
@@ -52,7 +52,7 @@ const faqs = [
           <a class="btn btn-gold" href={whatsappLink()} target="_blank" rel="noopener">
             Conversemos por WhatsApp
           </a>
-          <a class="btn btn-outline" href="/areas-de-practica">
+          <a class="btn btn-outline" href={path('/areas-de-practica')}>
             Conoce mis áreas de práctica
           </a>
         </div>
@@ -101,7 +101,7 @@ const faqs = [
 
       <div class="grid grid-3 services">
         {featured.map((s) => (
-          <a class="service-card" href={`/areas-de-practica/${s.slug}`}>
+          <a class="service-card" href={path(`/areas-de-practica/${s.slug}`)}>
             <span class="service-icon" aria-hidden="true">{s.icon}</span>
             <h3>{s.shortTitle ?? s.title}</h3>
             <p>{s.summary}</p>
@@ -112,7 +112,7 @@ const faqs = [
       </div>
 
       <div class="text-center" style="margin-top: 40px;">
-        <a class="btn btn-outline" href="/areas-de-practica">Ver todas las áreas</a>
+        <a class="btn btn-outline" href={path('/areas-de-practica')}>Ver todas las áreas</a>
       </div>
     </div>
   </section>
@@ -173,7 +173,7 @@ const faqs = [
           claridad sobre tus posibilidades reales, honorarios transparentes y
           comunicación constante durante todo el proceso.
         </p>
-        <a class="btn btn-outline" href="/sobre-mi">Conoce mi trayectoria</a>
+        <a class="btn btn-outline" href={path('/sobre-mi')}>Conoce mi trayectoria</a>
       </div>
     </div>
   </section>
@@ -209,7 +209,7 @@ const faqs = [
         <a class="btn btn--on-navy" href={whatsappLink()} target="_blank" rel="noopener">
           Conversemos por WhatsApp
         </a>
-        <a class="btn btn-outline--on-navy" href="/contacto">Más formas de contacto</a>
+        <a class="btn btn-outline--on-navy" href={path('/contacto')}>Más formas de contacto</a>
       </div>
     </div>
   </section>

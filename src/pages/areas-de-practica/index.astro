@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { whatsappLink } from '../../data/site';
+import { whatsappLink, path } from '../../data/site';
 import { services, groupLabels, type ServiceGroup } from '../../data/services';
 
 const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
@@ -35,7 +35,7 @@ const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
 
           <div class="grid grid-2 services">
             {groupServices.map((s) => (
-              <a class="service-card" href={`/areas-de-practica/${s.slug}`}>
+              <a class="service-card" href={path(`/areas-de-practica/${s.slug}`)}>
                 <div class="service-card-head">
                   <span class="service-icon" aria-hidden="true">{s.icon}</span>
                   <h3>{s.title}</h3>
