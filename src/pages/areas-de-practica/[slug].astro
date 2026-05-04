@@ -1,0 +1,277 @@
+---
+import Base from '../../layouts/Base.astro';
+import { whatsappLink } from '../../data/site';
+import { services, groupLabels } from '../../data/services';
+
+export function getStaticPaths() {
+  return services.map((s) => ({
+    params: { slug: s.slug },
+    props: { service: s },
+  }));
+}
+
+const { service } = Astro.props;
+
+const related = services
+  .filter((s) => s.group === service.group && s.slug !== service.slug)
+  .slice(0, 3);
+
+const customMessage = `Hola Natalia, me interesa el servicio "${service.title}". ¿Podrías darme más información?`;
+---
+
+<Base
+  title={service.title}
+  description={service.summary}
+>
+  <section class="section">
+    <div class="container container--narrow">
+      <p class="breadcrumb">
+        <a href="/areas-de-practica">Áreas de práctica</a> / <span>{groupLabels[service.group]}</span>
+      </p>
+
+      <div class="title-row">
+        <span class="service-icon" aria-hidden="true">{service.icon}</span>
+        <div>
+          <span class="eyebrow">{groupLabels[service.group]}</span>
+          <h1>{service.title}</h1>
+        </div>
+      </div>
+
+      <p class="lead">{service.summary}</p>
+
+      <div class="price-card">
+        <div>
+          <span class="muted">Honorarios referenciales</span>
+          <p class="price-value">{service.priceRange}</p>
+        </div>
+        <div>
+          <span class="muted">Modalidad</span>
+          <p class="model-value">{service.pricingModel}</p>
+        </div>
+      </div>
+
+      <div class="prose">
+        {service.description.map((p) => <p>{p}</p>)}
+      </div>
+
+      {service.includes && service.includes.length > 0 && (
+        <div class="includes">
+          <h2>El servicio incluye</h2>
+          <ul>
+            {service.includes.map((it) => <li>{it}</li>)}
+          </ul>
+        </div>
+      )}
+
+      <div class="cta-band">
+        <h2>¿Listo para empezar?</h2>
+        <p>
+          Escríbeme por WhatsApp y conversemos sobre tu caso. La primera
+          orientación es breve y sin compromiso.
+        </p>
+        <a class="btn btn-gold" href={whatsappLink(customMessage)} target="_blank" rel="noopener">
+          Conversemos por WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section section--cream-warm">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">También te puede interesar</span>
+          <h2>Otros servicios en {groupLabels[service.group].toLowerCase()}</h2>
+        </div>
+
+        <div class="grid grid-3">
+          {related.map((s) => (
+            <a class="service-card" href={`/areas-de-practica/${s.slug}`}>
+              <span class="service-icon" aria-hidden="true">{s.icon}</span>
+              <h3>{s.shortTitle ?? s.title}</h3>
+              <p>{s.summary}</p>
+              <span class="service-price">{s.priceRange}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .breadcrumb {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .breadcrumb a {
+    color: var(--muted);
+  }
+
+  .title-row {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .title-row h1 {
+    margin: 0;
+  }
+
+  .title-row .service-icon {
+    flex-shrink: 0;
+    font-size: 2rem;
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background: var(--cream-warm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .price-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    margin-block: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .price-card .muted {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .price-value {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    color: var(--navy);
+    font-weight: 600;
+    margin: 4px 0 0;
+  }
+
+  .model-value {
+    font-size: 1.05rem;
+    color: var(--charcoal);
+    margin: 4px 0 0;
+  }
+
+  .prose p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 1.2em;
+  }
+
+  .includes {
+    background: var(--cream-warm);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-block: 32px;
+  }
+
+  .includes h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .includes ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+  }
+
+  .includes li {
+    padding-left: 28px;
+    position: relative;
+    font-size: 0.98rem;
+  }
+
+  .includes li::before {
+    content: '✓';
+    color: var(--gold);
+    position: absolute;
+    left: 0;
+    font-weight: 700;
+  }
+
+  .cta-band {
+    background: var(--navy);
+    color: var(--cream);
+    border-radius: var(--radius-lg);
+    padding: 40px 32px;
+    text-align: center;
+    margin-block: 48px 0;
+  }
+
+  .cta-band h2 {
+    color: var(--cream);
+    margin-bottom: 12px;
+  }
+
+  .cta-band p {
+    color: var(--cream);
+    opacity: 0.85;
+    margin-bottom: 24px;
+    max-width: 56ch;
+    margin-inline: auto;
+  }
+
+  /* Related (reuse) */
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    color: var(--charcoal);
+    border-bottom: 1px solid var(--border) !important;
+    transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+  }
+
+  .service-card:hover {
+    border-color: var(--gold) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .service-card .service-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+  }
+
+  .service-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+  }
+
+  .service-card p {
+    color: var(--muted);
+    font-size: 0.92rem;
+    flex-grow: 1;
+    margin-bottom: 12px;
+  }
+
+  .service-price {
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 600px) {
+    .price-card { grid-template-columns: 1fr; }
+    .title-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+</style>

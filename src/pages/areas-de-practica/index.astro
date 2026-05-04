@@ -1,0 +1,175 @@
+---
+import Base from '../../layouts/Base.astro';
+import { whatsappLink } from '../../data/site';
+import { services, groupLabels, type ServiceGroup } from '../../data/services';
+
+const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
+---
+
+<Base
+  title="Áreas de práctica"
+  description="Áreas de práctica: divorcios, pensión de alimentos, custodia, visitas, autorización de salida del país, violencia intrafamiliar, recursos contra Isapres y registro de marcas en INAPI."
+>
+  <section class="section">
+    <div class="container container--narrow">
+      <span class="eyebrow">Áreas de práctica</span>
+      <h1>Servicios y honorarios</h1>
+      <p class="lead">
+        Estos son los servicios que ofrezco, con rangos referenciales de
+        honorarios. Cada caso se evalúa de forma personalizada y recibe una
+        propuesta cerrada por escrito antes de iniciar.
+      </p>
+    </div>
+  </section>
+
+  {groups.map((group) => {
+    const groupServices = services.filter((s) => s.group === group);
+    if (groupServices.length === 0) return null;
+    return (
+      <section class={`section ${group === 'hijos' || group === 'otros' ? 'section--cream-warm' : ''}`} id={group}>
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">{groupLabels[group]}</span>
+            <h2>{groupLabels[group]}</h2>
+          </div>
+
+          <div class="grid grid-2 services">
+            {groupServices.map((s) => (
+              <a class="service-card" href={`/areas-de-practica/${s.slug}`}>
+                <div class="service-card-head">
+                  <span class="service-icon" aria-hidden="true">{s.icon}</span>
+                  <h3>{s.title}</h3>
+                </div>
+                <p>{s.summary}</p>
+                <div class="service-card-foot">
+                  <span class="service-price">{s.priceRange}</span>
+                  <span class="service-link">Más información →</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  })}
+
+  <section class="section">
+    <div class="container container--narrow">
+      <div class="note">
+        <p>
+          <strong>Nota sobre los honorarios.</strong> Los valores indicados
+          son referenciales. El monto final se ajusta a la complejidad de
+          cada caso y se acuerda por escrito antes de comenzar. Los
+          honorarios pueden pagarse hasta en 3 cuotas sin interés con
+          tarjeta de crédito o transferencia bancaria.
+        </p>
+        <p style="margin-bottom: 0;">
+          <strong>Tasas y costos de tribunales</strong> (notarías, INAPI,
+          Diario Oficial, exámenes de ADN, etc.) son adicionales y se
+          informan por anticipado.
+        </p>
+      </div>
+
+      <div class="text-center" style="margin-top: 40px;">
+        <a class="btn btn-gold" href={whatsappLink()} target="_blank" rel="noopener">
+          Solicita tu propuesta por WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .section-head {
+    margin-bottom: 32px;
+  }
+
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    color: var(--charcoal);
+    transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+    border-bottom: 1px solid var(--border) !important;
+    height: 100%;
+  }
+
+  .service-card:hover {
+    border-color: var(--gold) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .service-card-head {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .service-icon {
+    flex-shrink: 0;
+    font-size: 1.6rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--cream-warm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .service-card h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .service-card p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    flex-grow: 1;
+    margin-bottom: 16px;
+  }
+
+  .service-card-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .service-price {
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+
+  .service-link {
+    color: var(--gold);
+    font-weight: 500;
+    font-size: 0.92rem;
+  }
+
+  .note {
+    background: var(--cream-warm);
+    border-left: 4px solid var(--gold);
+    padding: 24px 28px;
+    border-radius: var(--radius);
+  }
+
+  .note p {
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .note strong {
+    color: var(--navy);
+  }
+</style>

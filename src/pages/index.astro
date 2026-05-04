@@ -1,0 +1,500 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, whatsappLink } from '../data/site';
+import { getFeaturedServices } from '../data/services';
+
+const featured = getFeaturedServices();
+
+const faqs = [
+  {
+    q: '¿Cuánto demora un divorcio en Chile?',
+    a: 'Un divorcio de mutuo acuerdo se resuelve en 2 a 4 meses desde la presentación. Un divorcio unilateral, entre 6 y 12 meses dependiendo de la complejidad y la carga del tribunal.',
+  },
+  {
+    q: '¿Atiende online o solo presencial?',
+    a: 'Atiendo de forma híbrida: la primera consulta puede ser por videollamada o presencial en mi oficina en Santiago Centro. Las audiencias en Tribunales de Familia hoy son mayoritariamente por Zoom, lo que me permite representar a clientas y clientes de todo Chile.',
+  },
+  {
+    q: '¿Cuánto cuesta una primera consulta?',
+    a: 'La primera consulta tiene un valor referencial de $40.000 (60 minutos). En casos de violencia intrafamiliar la primera orientación es siempre gratuita.',
+  },
+  {
+    q: '¿Aceptan pago en cuotas?',
+    a: 'Sí, los honorarios pueden pagarse hasta en 3 cuotas sin interés con tarjeta de crédito o transferencia bancaria.',
+  },
+  {
+    q: '¿Qué pasa si la otra parte vive fuera de Chile?',
+    a: 'Existen mecanismos de notificación internacional (cartas rogatorias, exhortos por Convención de La Haya) que permiten avanzar igualmente. Tengo experiencia en estos casos.',
+  },
+  {
+    q: '¿Es obligatoria la mediación previa?',
+    a: 'Sí, en materias de pensión de alimentos, cuidado personal y régimen de relación directa y regular la mediación familiar es obligatoria antes de demandar. Yo te acompaño durante todo el proceso.',
+  },
+];
+---
+
+<Base
+  title="Asesoría legal en Derecho de Familia"
+  description="Abogada en Santiago especializada en divorcios, pensión de alimentos, custodia de niños y violencia intrafamiliar. Honorarios transparentes y atención personalizada."
+>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <span class="eyebrow">Abogada · Santiago, Chile</span>
+        <h1>Asesoría legal en Derecho de Familia, con cercanía y compromiso.</h1>
+        <p class="lead">
+          Abogada especializada en divorcios, pensión de alimentos, custodia
+          de niños y violencia intrafamiliar. Te acompaño en cada etapa con
+          claridad, transparencia y honorarios fijos.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn btn-gold" href={whatsappLink()} target="_blank" rel="noopener">
+            Conversemos por WhatsApp
+          </a>
+          <a class="btn btn-outline" href="/areas-de-practica">
+            Conoce mis áreas de práctica
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-photo">
+        <!-- TODO: replace with real photo of Natalia -->
+        <div class="hero-photo-placeholder" aria-hidden="true">
+          <span class="photo-mark">NV</span>
+          <span class="photo-caption">Foto profesional</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BAR -->
+  <section class="trust-bar">
+    <div class="container trust-grid">
+      <div class="trust-item">
+        <span class="trust-num">✦</span>
+        <p><strong>Titulada en {site.university}</strong><br /><span class="muted">Habilitada ante la Excma. Corte Suprema</span></p>
+      </div>
+      <div class="trust-item">
+        <span class="trust-num">✦</span>
+        <p><strong>Atención personalizada</strong><br /><span class="muted">Trato directo con la abogada en cada etapa</span></p>
+      </div>
+      <div class="trust-item">
+        <span class="trust-num">✦</span>
+        <p><strong>Primera orientación gratuita</strong><br /><span class="muted">Para casos de violencia intrafamiliar</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES GRID -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Áreas de práctica</span>
+        <h2>Cómo puedo ayudarte</h2>
+        <p class="lead">
+          Mis servicios cubren las principales materias del Derecho de
+          Familia, además de recursos contra Isapres y registro de marcas.
+          Cada caso recibe una propuesta de honorarios clara y por escrito.
+        </p>
+      </div>
+
+      <div class="grid grid-3 services">
+        {featured.map((s) => (
+          <a class="service-card" href={`/areas-de-practica/${s.slug}`}>
+            <span class="service-icon" aria-hidden="true">{s.icon}</span>
+            <h3>{s.shortTitle ?? s.title}</h3>
+            <p>{s.summary}</p>
+            <span class="service-price">{s.priceRange}</span>
+            <span class="service-link">Conoce más →</span>
+          </a>
+        ))}
+      </div>
+
+      <div class="text-center" style="margin-top: 40px;">
+        <a class="btn btn-outline" href="/areas-de-practica">Ver todas las áreas</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW I WORK -->
+  <section class="section section--cream-warm">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Mi proceso</span>
+        <h2>Cómo trabajo contigo</h2>
+      </div>
+
+      <div class="grid grid-4 steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <h4>Conversamos</h4>
+          <p>Me escribes por WhatsApp o agendamos una primera consulta de 60 minutos para entender tu situación.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <h4>Análisis del caso</h4>
+          <p>Reviso los antecedentes, te explico tus opciones legales con claridad y te entrego una propuesta de honorarios fija por escrito.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <h4>Definimos estrategia</h4>
+          <p>Acordamos juntas la estrategia más conveniente para tus objetivos. Confirmas y firmamos el mandato.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <h4>Te represento</h4>
+          <p>Asumo la representación, presento las acciones que correspondan y te informo del avance en cada etapa.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT PREVIEW -->
+  <section class="section">
+    <div class="container about-preview">
+      <div class="about-photo">
+        <!-- TODO: replace with real photo -->
+        <div class="hero-photo-placeholder" aria-hidden="true">
+          <span class="photo-mark">NV</span>
+        </div>
+      </div>
+      <div>
+        <span class="eyebrow">Sobre mí</span>
+        <h2>Hola, soy Natalia.</h2>
+        <p class="lead">
+          Soy abogada titulada en {site.university}, con foco en Derecho de
+          Familia. Elegí esta especialidad porque me importan las personas
+          detrás de cada caso: la separación, la pensión, la custodia o la
+          violencia tocan lo más íntimo de una vida.
+        </p>
+        <p>
+          Mi compromiso es darte una asesoría humana, técnica y honesta:
+          claridad sobre tus posibilidades reales, honorarios transparentes y
+          comunicación constante durante todo el proceso.
+        </p>
+        <a class="btn btn-outline" href="/sobre-mi">Conoce mi trayectoria</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section--cream-warm">
+    <div class="container container--narrow">
+      <div class="section-head text-center">
+        <span class="eyebrow">Preguntas frecuentes</span>
+        <h2>Resolviendo tus dudas</h2>
+      </div>
+
+      <div class="faqs">
+        {faqs.map((f) => (
+          <details class="faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="section section--navy">
+    <div class="container final-cta">
+      <h2>¿Necesitas orientación? Hablemos hoy mismo.</h2>
+      <p class="lead" style="color: var(--cream); opacity: 0.9;">
+        Te respondo personalmente. La primera consulta es de 60 minutos y
+        te entrega claridad sobre tus opciones legales.
+      </p>
+      <div class="hero-ctas" style="justify-content: center;">
+        <a class="btn btn--on-navy" href={whatsappLink()} target="_blank" rel="noopener">
+          Conversemos por WhatsApp
+        </a>
+        <a class="btn btn-outline--on-navy" href="/contacto">Más formas de contacto</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: clamp(56px, 9vw, 120px);
+    background: linear-gradient(180deg, var(--cream) 0%, var(--cream-warm) 100%);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 56px;
+    align-items: center;
+  }
+
+  .hero-text h1 {
+    margin-top: 8px;
+    margin-bottom: 24px;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .hero-photo-placeholder {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(circle at 30% 20%, var(--navy-soft), var(--navy) 60%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-family: var(--serif);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .hero-photo-placeholder::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 70% 80%, rgba(201, 168, 100, 0.12), transparent 50%);
+  }
+
+  .photo-mark {
+    font-size: clamp(4rem, 10vw, 7rem);
+    font-weight: 600;
+  }
+
+  .photo-caption {
+    color: var(--cream);
+    opacity: 0.5;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+
+  @media (max-width: 800px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-photo { max-width: 360px; margin-inline: auto; width: 100%; }
+  }
+
+  /* Trust bar */
+  .trust-bar {
+    background: var(--navy);
+    color: var(--cream);
+    padding: 32px 0;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .trust-item p {
+    margin: 0;
+    font-size: 0.96rem;
+    line-height: 1.5;
+  }
+
+  .trust-item .muted {
+    color: var(--cream);
+    opacity: 0.7;
+    font-size: 0.86rem;
+  }
+
+  .trust-num {
+    color: var(--gold);
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  @media (max-width: 800px) {
+    .trust-grid { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  /* Section heading */
+  .section-head {
+    margin-bottom: 48px;
+    max-width: 700px;
+  }
+
+  .section-head.text-center {
+    margin-inline: auto;
+  }
+
+  /* Services grid */
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--charcoal);
+  }
+
+  .service-card:hover {
+    border-color: var(--gold) !important;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .service-icon {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: var(--cream-warm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .service-card h3 {
+    margin-bottom: 8px;
+  }
+
+  .service-card p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    flex-grow: 1;
+  }
+
+  .service-price {
+    display: inline-block;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-bottom: 8px;
+  }
+
+  .service-link {
+    color: var(--gold);
+    font-weight: 500;
+    font-size: 0.92rem;
+  }
+
+  /* Steps */
+  .steps {
+    margin-top: 16px;
+  }
+
+  .step {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    border: 1px solid var(--border);
+  }
+
+  .step-num {
+    display: inline-block;
+    color: var(--gold);
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .step h4 {
+    margin-bottom: 8px;
+  }
+
+  .step p {
+    color: var(--muted);
+    font-size: 0.94rem;
+    margin: 0;
+  }
+
+  /* About preview */
+  .about-preview {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 56px;
+    align-items: center;
+  }
+
+  .about-photo .hero-photo-placeholder {
+    aspect-ratio: 1 / 1;
+    max-width: 380px;
+  }
+
+  @media (max-width: 800px) {
+    .about-preview { grid-template-columns: 1fr; }
+    .about-photo { max-width: 280px; margin-inline: auto; width: 100%; }
+  }
+
+  /* FAQ */
+  .faqs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .faq {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .faq summary {
+    padding: 18px 24px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1.02rem;
+    color: var(--navy);
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .faq summary::-webkit-details-marker { display: none; }
+
+  .faq summary::after {
+    content: '+';
+    color: var(--gold);
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    line-height: 1;
+    transition: transform 200ms ease;
+  }
+
+  .faq[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .faq p {
+    padding: 0 24px 20px;
+    margin: 0;
+    color: var(--muted);
+  }
+
+  /* Final CTA */
+  .final-cta {
+    text-align: center;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .final-cta h2 {
+    margin-bottom: 16px;
+  }
+</style>

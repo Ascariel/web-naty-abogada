@@ -1,0 +1,161 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, whatsappLink } from '../data/site';
+---
+
+<Base
+  title="Sobre mí"
+  description="Conoce a Natalia Vallejos Gutiérrez, abogada en Santiago especializada en Derecho de Familia. Trayectoria, formación y enfoque profesional."
+>
+  <section class="section">
+    <div class="container container--narrow">
+      <span class="eyebrow">Sobre mí</span>
+      <h1>Hola, soy Natalia Vallejos Gutiérrez.</h1>
+      <p class="lead">
+        Abogada en Santiago, especializada en Derecho de Familia. Te acompaño
+        en los momentos más complejos de tu vida con asesoría humana,
+        técnica y honesta.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--cream-warm">
+    <div class="container about-grid">
+      <div class="about-photo">
+        <!-- TODO: replace with real photo -->
+        <div class="photo-placeholder">
+          <span class="photo-mark">NV</span>
+          <span class="photo-caption">Foto profesional</span>
+        </div>
+      </div>
+
+      <div class="about-text">
+        <h2>Mi trayectoria</h2>
+        <p>
+          Soy abogada titulada en {site.university}, habilitada ante la
+          Excma. Corte Suprema el año {site.yearAdmitted}. He centrado mi
+          ejercicio en el Derecho de Familia porque me importan las personas
+          detrás de cada caso: una separación, una pensión, una custodia o
+          un episodio de violencia tocan lo más íntimo de una vida.
+        </p>
+        <p>
+          Cuento además con {site.diplomado}, formación que me ha permitido
+          profundizar en los aspectos psicológicos, sociales y procesales
+          que distinguen al Derecho de Familia de otras áreas.
+        </p>
+        <p>
+          Atiendo casos de toda la Región Metropolitana y del resto de Chile
+          a través de las audiencias por videoconferencia. Mi oficina está
+          en Santiago Centro y allí recibo a quienes prefieren la atención
+          presencial.
+        </p>
+
+        <h3 style="margin-top: 32px;">Mis credenciales</h3>
+        <ul class="credentials">
+          <li><strong>Universidad:</strong> {site.university}</li>
+          <li><strong>Habilitación:</strong> Excma. Corte Suprema, {site.yearAdmitted}</li>
+          <li><strong>Postgrado:</strong> {site.diplomado}</li>
+          <li><strong>Experiencia:</strong> Más de {site.yearsExperience} años en Derecho de Familia</li>
+          <li>
+            <strong>Verificación pública:</strong>
+            <a href="https://www.pjud.cl/" target="_blank" rel="noopener noreferrer">
+              Buscador del Poder Judicial
+            </a>
+          </li>
+        </ul>
+
+        <h3 style="margin-top: 32px;">Cómo trabajo</h3>
+        <ul class="values">
+          <li>
+            <strong>Cercanía.</strong> Atiendo personalmente cada caso. No te
+            atenderá un asistente —me tendrás a mí en cada audiencia y
+            conversación.
+          </li>
+          <li>
+            <strong>Transparencia.</strong> Honorarios fijos, presupuesto por
+            escrito antes de comenzar y reportes periódicos del avance.
+          </li>
+          <li>
+            <strong>Confidencialidad.</strong> Lo que compartes conmigo está
+            amparado por el secreto profesional.
+          </li>
+          <li>
+            <strong>Realismo.</strong> Te diré las posibilidades reales de tu
+            caso —tanto las buenas como las difíciles— para que tomes
+            decisiones informadas.
+          </li>
+        </ul>
+
+        <div style="margin-top: 40px;">
+          <a class="btn btn-gold" href={whatsappLink()} target="_blank" rel="noopener">
+            Conversemos por WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 56px;
+    align-items: start;
+  }
+
+  .photo-placeholder {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-lg);
+    background: radial-gradient(circle at 30% 20%, var(--navy-soft), var(--navy) 60%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-family: var(--serif);
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 100px;
+  }
+
+  .photo-mark { font-size: 5rem; font-weight: 600; }
+  .photo-caption {
+    color: var(--cream);
+    opacity: 0.5;
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+
+  .credentials, .values {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .credentials li, .values li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .credentials li:last-child, .values li:last-child {
+    border-bottom: 0;
+  }
+
+  .credentials strong, .values strong {
+    color: var(--navy);
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  @media (max-width: 800px) {
+    .about-grid { grid-template-columns: 1fr; }
+    .photo-placeholder { position: static; max-width: 320px; margin-inline: auto; width: 100%; }
+  }
+</style>

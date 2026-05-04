@@ -1,0 +1,166 @@
+---
+import { site, whatsappLink } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <div class="brand-mark">NV</div>
+      <p class="brand-line">{site.fullName}</p>
+      <p class="role-line">{site.role}</p>
+      <p class="muted">{site.officeAddress}</p>
+    </div>
+
+    <div>
+      <h4>Áreas de práctica</h4>
+      <ul>
+        <li><a href="/areas-de-practica#pareja">Divorcios</a></li>
+        <li><a href="/areas-de-practica#hijos">Pensión de alimentos</a></li>
+        <li><a href="/areas-de-practica#hijos">Custodia y visitas</a></li>
+        <li><a href="/areas-de-practica#proteccion">Violencia intrafamiliar</a></li>
+        <li><a href="/areas-de-practica#otros">Recursos contra Isapres</a></li>
+        <li><a href="/areas-de-practica#otros">Registro de marcas (INAPI)</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Contacto</h4>
+      <ul>
+        <li><a href={whatsappLink()} target="_blank" rel="noopener">WhatsApp</a></li>
+        <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        <li><a href="/contacto">Formulario de contacto</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Información legal</h4>
+      <ul>
+        <li><a href="/privacidad">Política de privacidad</a></li>
+        <li><a href="/contacto#disclaimer">Aviso legal</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p class="muted">
+      © {year} {site.fullName}. Todos los derechos reservados.
+    </p>
+    <p class="muted disclaimer">
+      El contenido de este sitio es informativo y no sustituye una asesoría legal personalizada.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--navy);
+    color: var(--cream);
+    padding: 64px 0 24px;
+    margin-top: 64px;
+  }
+
+  .site-footer h4 {
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 16px;
+    color: var(--gold);
+  }
+
+  .footer-grid {
+    display: grid;
+    gap: 40px;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  }
+
+  .footer-grid ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-grid a {
+    color: var(--cream);
+    opacity: 0.85;
+    font-size: 0.94rem;
+  }
+
+  .footer-grid a:hover {
+    opacity: 1;
+    border-bottom-color: var(--gold);
+  }
+
+  .brand-mark {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .brand-line {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--cream);
+    margin: 0;
+  }
+
+  .role-line {
+    color: var(--gold);
+    font-size: 0.92rem;
+    margin: 4px 0 12px;
+  }
+
+  .muted {
+    color: var(--cream);
+    opacity: 0.6;
+    font-size: 0.88rem;
+  }
+
+  .footer-bottom {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(247, 244, 236, 0.15);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .disclaimer {
+    font-size: 0.82rem;
+    max-width: 56ch;
+    text-align: right;
+  }
+
+  @media (max-width: 800px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .footer-bottom {
+      flex-direction: column;
+    }
+    .disclaimer {
+      text-align: left;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,92 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../data/site';
+---
+
+<Base
+  title="Política de privacidad"
+  description="Política de tratamiento de datos personales conforme a la Ley 19.628 y la Ley 21.719 de Protección de Datos Personales de Chile."
+>
+  <section class="section">
+    <div class="container container--narrow">
+      <span class="eyebrow">Información legal</span>
+      <h1>Política de privacidad</h1>
+      <p class="lead">
+        Este sitio web respeta la privacidad de sus visitantes y cumple con
+        la Ley N° 19.628 sobre Protección de la Vida Privada y la Ley N°
+        21.719 sobre Protección de Datos Personales.
+      </p>
+
+      <h2>Responsable del tratamiento</h2>
+      <p>
+        El responsable del tratamiento de los datos personales recolectados
+        a través de este sitio es <strong>{site.fullName}</strong>, abogada,
+        con oficina en Santiago, Chile. Para cualquier consulta sobre tus
+        datos puedes escribir a <a href={`mailto:${site.email}`}>{site.email}</a>.
+      </p>
+
+      <h2>Datos que recolectamos</h2>
+      <p>
+        Este sitio no recolecta datos personales de manera automática
+        mediante formularios. Cuando contactas por WhatsApp eres redirigido
+        a la plataforma de WhatsApp Inc., cuya política de privacidad rige
+        ese intercambio.
+      </p>
+      <p>
+        Si en el futuro se incorporan formularios de contacto, los datos
+        que entregues voluntariamente (nombre, correo, teléfono, breve
+        descripción de tu caso) serán utilizados únicamente para responderte
+        y eventualmente prestarte servicios legales si así lo decides.
+      </p>
+
+      <h2>Cookies y analítica</h2>
+      <p>
+        Este sitio utiliza herramientas de analítica que respetan la
+        privacidad y no instalan cookies de seguimiento ni rastrean a los
+        usuarios entre sitios. No se utiliza Google Analytics ni
+        herramientas similares basadas en cookies.
+      </p>
+
+      <h2>Tus derechos</h2>
+      <p>
+        De acuerdo con la legislación vigente, tienes derecho a acceder,
+        rectificar, cancelar y oponerte al tratamiento de tus datos
+        personales. Puedes ejercer estos derechos escribiendo a
+        <a href={`mailto:${site.email}`}>{site.email}</a>.
+      </p>
+
+      <h2>Confidencialidad profesional</h2>
+      <p>
+        La información que compartas en el contexto de una consulta legal
+        está adicionalmente protegida por el secreto profesional del
+        abogado, conforme al Código de Ética del Colegio de Abogados de
+        Chile.
+      </p>
+
+      <h2>Cambios a esta política</h2>
+      <p>
+        Esta política puede ser actualizada para reflejar cambios legales
+        o en las prácticas del sitio. La fecha de la última actualización
+        se mostrará en el pie del documento.
+      </p>
+
+      <p class="muted small" style="margin-top: 40px;">
+        Última actualización: mayo de 2026.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  h2 {
+    margin-top: 32px;
+  }
+
+  p {
+    line-height: 1.7;
+  }
+
+  .small {
+    font-size: 0.85rem;
+  }
+</style>

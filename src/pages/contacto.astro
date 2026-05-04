@@ -1,0 +1,201 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, whatsappLink } from '../data/site';
+---
+
+<Base
+  title="Contacto"
+  description="Conversemos sobre tu caso. WhatsApp, correo y oficina en Santiago Centro."
+>
+  <section class="section">
+    <div class="container container--narrow">
+      <span class="eyebrow">Contacto</span>
+      <h1>Conversemos sobre tu caso</h1>
+      <p class="lead">
+        El canal más rápido para llegar a mí es WhatsApp. Te respondo
+        personalmente, normalmente dentro de las próximas horas en horario
+        hábil.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--cream-warm" style="padding-top: 24px;">
+    <div class="container container--narrow">
+      <div class="contact-grid">
+        <a class="contact-card" href={whatsappLink()} target="_blank" rel="noopener">
+          <span class="contact-icon">💬</span>
+          <div>
+            <h3>WhatsApp</h3>
+            <p>Respuesta personalizada en horario hábil</p>
+            <span class="contact-action">Iniciar conversación →</span>
+          </div>
+        </a>
+
+        <a class="contact-card" href={`mailto:${site.email}`}>
+          <span class="contact-icon">✉️</span>
+          <div>
+            <h3>Correo electrónico</h3>
+            <p>{site.email}</p>
+            <span class="contact-action">Enviar correo →</span>
+          </div>
+        </a>
+
+        <div class="contact-card">
+          <span class="contact-icon">📍</span>
+          <div>
+            <h3>Oficina</h3>
+            <p>{site.officeAddress}</p>
+            <span class="muted small">Atención previa coordinación</span>
+          </div>
+        </div>
+
+        <div class="contact-card">
+          <span class="contact-icon">🕒</span>
+          <div>
+            <h3>Horario</h3>
+            <p>Lunes a viernes, 9:00 – 19:00 hrs</p>
+            <span class="muted small">Casos de VIF: atención prioritaria</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container container--narrow">
+      <h2>¿Qué incluye una primera consulta?</h2>
+      <ul class="bullet-list">
+        <li>60 minutos de conversación, presencial o por videollamada.</li>
+        <li>Revisión de los antecedentes que tengas (documentos, mensajes, sentencias previas).</li>
+        <li>Explicación de tus opciones legales reales y sus plazos.</li>
+        <li>Propuesta de honorarios fija y por escrito si decides avanzar.</li>
+      </ul>
+
+      <p>
+        Valor referencial de la consulta: <strong>$40.000</strong>. En casos
+        de violencia intrafamiliar la primera orientación es siempre
+        gratuita.
+      </p>
+
+      <div id="disclaimer" class="disclaimer-box">
+        <h3>Aviso legal</h3>
+        <p>
+          La información disponible en este sitio web tiene fines generales
+          y no constituye asesoría legal personalizada. Los rangos de
+          honorarios indicados son referenciales y pueden variar según las
+          particularidades de cada caso.
+        </p>
+        <p>
+          El envío de un mensaje por WhatsApp o por cualquier otro medio no
+          establece por sí mismo una relación abogado-cliente. Esta se
+          formaliza únicamente mediante mandato escrito firmado por ambas
+          partes.
+        </p>
+        <p style="margin-bottom: 0;">
+          La información que compartas durante la consulta queda amparada
+          por el secreto profesional.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .contact-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    gap: 16px;
+    color: var(--charcoal);
+    border-bottom: 1px solid var(--border) !important;
+    transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+  }
+
+  a.contact-card:hover {
+    border-color: var(--gold) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .contact-icon {
+    font-size: 1.6rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--cream-warm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .contact-card h3 {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+  }
+
+  .contact-card p {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+
+  .contact-action {
+    color: var(--gold);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .small { font-size: 0.84rem; }
+
+  .bullet-list {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 24px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .bullet-list li {
+    padding-left: 28px;
+    position: relative;
+  }
+
+  .bullet-list li::before {
+    content: '✓';
+    color: var(--gold);
+    font-weight: 700;
+    position: absolute;
+    left: 0;
+  }
+
+  .disclaimer-box {
+    background: var(--cream-warm);
+    border-left: 4px solid var(--navy);
+    padding: 24px 28px;
+    border-radius: var(--radius);
+    margin-top: 48px;
+  }
+
+  .disclaimer-box h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+
+  .disclaimer-box p {
+    font-size: 0.94rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 600px) {
+    .contact-grid { grid-template-columns: 1fr; }
+  }
+</style>
