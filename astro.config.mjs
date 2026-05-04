@@ -2,17 +2,26 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// In dev we serve at the root ("/") so localhost:4321/ shows the home page.
-// In prod we publish under /web-naty-abogada/ because GitHub Pages serves
-// project sites at <user>.github.io/<repo>/.
+// Where this build will live:
+//   - GitHub Pages publishes under <user>.github.io/<repo>/, so the build
+//     needs a base path. We detect that via GITHUB_ACTIONS, which the
+//     runner sets to "true".
+//   - Cloudflare Pages, custom domains, and local dev all serve at the
+//     root, so base stays "/".
 //
-// When a custom domain is connected later, drop the prod branch entirely:
-// change `site` to the domain and remove this conditional.
+// When a custom domain is connected later (and GitHub Pages is decommissioned),
+// drop this conditional and just set base: '/' and site: '<your domain>'.
 const isDev = process.argv.includes('dev');
+const isGitHubPages = !!process.env.GITHUB_ACTIONS;
+
+const base = isGitHubPages && !isDev ? '/web-naty-abogada' : '/';
+const site = isGitHubPages
+  ? 'https://ascariel.github.io'
+  : 'https://web-naty-abogada.pages.dev';
 
 export default defineConfig({
-  site: 'https://ascariel.github.io',
-  base: isDev ? '/' : '/web-naty-abogada',
+  site,
+  base,
   integrations: [sitemap()],
   trailingSlash: 'ignore',
   build: {

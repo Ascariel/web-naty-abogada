@@ -40,14 +40,12 @@ There is no test suite, no linter, and no formatter configured. `npm run build` 
 
 ## The `path()` helper — do not skip
 
-The site is hosted under a base path in production (`/web-naty-abogada` on GitHub Pages). In dev the base is `/` so the dev server matches a normal local-dev experience. The conditional lives at the top of `astro.config.mjs`:
+The site has two production deploys, each with a different URL shape:
 
-```js
-const isDev = process.argv.includes('dev');
-base: isDev ? '/' : '/web-naty-abogada',
-```
+- **GitHub Pages** at `https://ascariel.github.io/web-naty-abogada/` — needs `base: '/web-naty-abogada'` so asset URLs resolve.
+- **Cloudflare Pages** at `https://web-naty-abogada.pages.dev/` — serves at the root, so `base: '/'`.
 
-**Hardcoded `href="/foo"` links break in production** — they resolve to `https://ascariel.github.io/foo` (404) instead of the project URL.
+`astro.config.mjs` switches between them via the `GITHUB_ACTIONS` env var (set to `true` only on the GitHub Actions runner). Cloudflare Pages and local dev both use `base: '/'`. **Hardcoded `href="/foo"` links would break on the GitHub Pages build** — they resolve to `https://ascariel.github.io/foo` (404).
 
 Every internal link must flow through `path()` from `src/data/site.ts`:
 
@@ -63,16 +61,19 @@ import { path } from '../data/site';
 
 ## Deploy
 
-`.github/workflows/deploy.yml` runs on every push to `main`. It uses `withastro/action@v3` (Node 22) to build, then `actions/deploy-pages@v4` to publish. End-to-end takes ~30 seconds.
+Two automatic deploys are wired up:
 
-Repo settings have `build_type: workflow` (configured once via `gh api -X POST /repos/.../pages -f build_type=workflow`). HTTPS is enforced. Don't push directly to `gh-pages` — the workflow manages the artifact.
+- **GitHub Pages** via `.github/workflows/deploy.yml` on every push to `main`. Uses `withastro/action@v3` + `actions/deploy-pages@v4`. ~30 s end-to-end. Repo has `build_type: workflow` configured.
+- **Cloudflare Pages** auto-deploys from the same `main` branch (configured in the Cloudflare dashboard, not in this repo). Cloudflare runs `npm run build` without `GITHUB_ACTIONS` set, so it gets the root-base build.
+
+Both deploys come from the same commit; the difference is which env var is present at build time.
 
 ## Migrating to a custom domain (when registered)
 
-1. In `astro.config.mjs`: change `site` to the domain and **drop the conditional** so `base` is just `'/'` in both dev and prod (or remove `base` entirely).
+1. In `astro.config.mjs`: drop the conditional and just set `site: '<domain>'` and `base: '/'`. Decommission whichever deploy you're abandoning (most likely GitHub Pages, since Cloudflare's free tier is more permissive and faster).
 2. In `public/robots.txt`: update the sitemap URL.
-3. Add `public/CNAME` containing the bare domain (e.g. `nataliavallejos.cl`).
-4. At the registrar (NIC.cl), point `A` records for the apex to `185.199.108.153`/`.109`/`.110`/`.111`, and a `CNAME` for `www` to `ascariel.github.io`.
+3. Add `public/CNAME` containing the bare domain (e.g. `nataliavallejos.cl`) so Cloudflare/Pages picks it up.
+4. At the registrar (NIC.cl), follow the chosen host's DNS instructions.
 5. The `path()` helper becomes a no-op automatically (`BASE_URL` becomes `/`), so internal links keep working without further edits.
 
 ## Conventions worth knowing
