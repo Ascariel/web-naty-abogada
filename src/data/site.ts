@@ -7,17 +7,16 @@ export const site = {
   whatsappNumber: '56936387240',
   whatsappDefaultMessage:
     'Hola Natalia, me gustaría una orientación legal. ¿Podrías ayudarme?',
-  email: 'contacto@nataliavallejos.cl',
+  email: 'nataliaandreavallejos@gmail.com',
   // TODO: replace with real address
-  officeAddress: 'Oficina en Santiago Centro · Chile',
-  // TODO: real social links
+  officeAddress: 'Atención en Santiago · Chile',
   instagram: '',
-  linkedin: '',
-  // Trust signals (placeholder until Naty confirms)
-  university: 'Universidad de Chile',
-  yearAdmitted: 2018,
-  diplomado: 'Diplomado en Derecho de Familia, Infancia y Adolescencia',
-  yearsExperience: 6,
+  linkedin: 'https://www.linkedin.com/in/natalia-vallejosgutierrez/',
+  university: 'Universidad Alberto Hurtado',
+  degree: 'Licenciada en Ciencias Jurídicas y Sociales',
+  yearAdmitted: 2026,
+  diplomado: 'Diplomado en Gobierno Corporativo y Compliance, Universidad de Chile',
+  practiceFocus: 'Derecho de Familia, Violencia Intrafamiliar y Derechos Humanos',
 } as const;
 
 export const navItems = [

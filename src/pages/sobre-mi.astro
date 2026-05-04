@@ -12,9 +12,9 @@ import { site, whatsappLink } from '../data/site';
       <span class="eyebrow">Sobre mí</span>
       <h1>Hola, soy Natalia Vallejos Gutiérrez.</h1>
       <p class="lead">
-        Abogada en Santiago, especializada en Derecho de Familia. Te acompaño
-        en los momentos más complejos de tu vida con asesoría humana,
-        técnica y honesta.
+        Abogada en Santiago con enfoque en Derecho de Familia, Violencia
+        Intrafamiliar y Derechos Humanos. Te acompaño en los momentos más
+        complejos de tu vida con asesoría humana, técnica y honesta.
       </p>
     </div>
   </section>
@@ -32,30 +32,58 @@ import { site, whatsappLink } from '../data/site';
       <div class="about-text">
         <h2>Mi trayectoria</h2>
         <p>
-          Soy abogada titulada en {site.university}, habilitada ante la
-          Excma. Corte Suprema el año {site.yearAdmitted}. He centrado mi
-          ejercicio en el Derecho de Familia porque me importan las personas
-          detrás de cada caso: una separación, una pensión, una custodia o
-          un episodio de violencia tocan lo más íntimo de una vida.
+          Soy {site.degree} por la {site.university} y abogada habilitada
+          ante la Excma. Corte Suprema en {site.yearAdmitted}. Mi enfoque
+          profesional combina el Derecho de Familia, la Violencia
+          Intrafamiliar (VIF) y los Derechos Humanos.
         </p>
         <p>
-          Cuento además con {site.diplomado}, formación que me ha permitido
-          profundizar en los aspectos psicológicos, sociales y procesales
-          que distinguen al Derecho de Familia de otras áreas.
+          Mi formación práctica se construyó en dos espacios fundamentales:
+          el <strong>SernamEG, Centro de la Mujer de Quilicura</strong>,
+          donde representé a víctimas de violencia intrafamiliar en sede
+          penal y coordiné con URAVIT de la Fiscalía; y la
+          <strong>Corporación de Asistencia Judicial</strong>, donde
+          tramité 103 causas en Tribunales de Familia y Centros de Medidas
+          Cautelares, logrando el cierre efectivo de 62 de ellas
+          (calificación de práctica: 6,9 / 7,0).
         </p>
         <p>
-          Atiendo casos de toda la Región Metropolitana y del resto de Chile
-          a través de las audiencias por videoconferencia. Mi oficina está
-          en Santiago Centro y allí recibo a quienes prefieren la atención
-          presencial.
+          Actualmente ejerzo como procuradora particular en materias de
+          Familia y curso un <strong>Diplomado en Gobierno Corporativo y
+          Compliance</strong> en la Facultad de Derecho de la Universidad
+          de Chile, formación que complementa mi trabajo con una mirada
+          rigurosa sobre integridad institucional y gestión de riesgos
+          legales.
         </p>
+        <p>
+          Atiendo casos de toda la Región Metropolitana y del resto de
+          Chile a través de las audiencias por videoconferencia, con
+          dominio avanzado de la Oficina Judicial Virtual (OJV).
+        </p>
+
+        <h3 style="margin-top: 32px;">Experiencia profesional</h3>
+        <ul class="credentials">
+          <li>
+            <strong>Procuradora Particular</strong> · 2026 al presente<br />
+            <span class="muted">Asesoría legal y representación judicial en materias de familia. Redacción y revisión de escritos judiciales y extrajudiciales.</span>
+          </li>
+          <li>
+            <strong>Práctica profesional · Corporación de Asistencia Judicial</strong> · 2025 – 2026<br />
+            <span class="muted">Tramitación integral de 103 causas en Tribunales de Familia y Centros de Medidas Cautelares, con 62 cierres efectivos. Representación judicial en cuidado personal, alimentos, relación directa y regular, divorcios, filiación, autorización de salida del país, VIF y medidas de protección. Calificación 6,9 / 7,0.</span>
+          </li>
+          <li>
+            <strong>Práctica profesional · SernamEG, Centro de la Mujer Quilicura</strong> · 2023 – 2024<br />
+            <span class="muted">Tramitación de causas en sede penal por violencia intrafamiliar en contextos de pareja. Coordinación interinstitucional con URAVIT de la Fiscalía para la representación de víctimas. Participación en campañas de sensibilización y prevención de la violencia de género.</span>
+          </li>
+        </ul>
 
         <h3 style="margin-top: 32px;">Mis credenciales</h3>
         <ul class="credentials">
           <li><strong>Universidad:</strong> {site.university}</li>
-          <li><strong>Habilitación:</strong> Excma. Corte Suprema, {site.yearAdmitted}</li>
-          <li><strong>Postgrado:</strong> {site.diplomado}</li>
-          <li><strong>Experiencia:</strong> Más de {site.yearsExperience} años en Derecho de Familia</li>
+          <li><strong>Título:</strong> {site.degree}</li>
+          <li><strong>Habilitación:</strong> Abogada ante la Excma. Corte Suprema, {site.yearAdmitted}</li>
+          <li><strong>Postgrado en curso:</strong> {site.diplomado}</li>
+          <li><strong>Formación complementaria:</strong> Curso de Litigio Estratégico Comunitario, Escuela Latinoamericana de Abogacía Comunitaria y Activismo Jurídico (2025)</li>
           <li>
             <strong>Verificación pública:</strong>
             <a href="https://www.pjud.cl/" target="_blank" rel="noopener noreferrer">
