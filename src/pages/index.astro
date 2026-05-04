@@ -337,14 +337,14 @@ const faqs = [
 
 <style>
   .hero {
-    padding-block: clamp(56px, 8vw, 96px);
+    padding-block: clamp(48px, 6vw, 80px);
     background: var(--cream);
   }
 
   .hero-grid {
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 64px;
+    grid-template-columns: 1.45fr 1fr;
+    gap: 56px;
     align-items: center;
   }
 
@@ -363,20 +363,21 @@ const faqs = [
   .hero-title {
     font-family: var(--serif);
     font-weight: 500;
-    font-size: clamp(2.4rem, 5.2vw, 4rem);
-    line-height: 1.05;
+    font-size: clamp(2.2rem, 4.4vw, 3.4rem);
+    line-height: 1.08;
     color: var(--navy);
-    margin: 24px 0 28px;
+    margin: 18px 0 20px;
     letter-spacing: -0.005em;
+    max-width: 14ch;
   }
 
   .hero-lead {
     font-family: var(--sans);
-    font-size: 1.1rem;
-    line-height: 1.6;
+    font-size: 1.05rem;
+    line-height: 1.55;
     color: #4a4a4a;
-    max-width: 56ch;
-    margin: 24px 0 36px;
+    max-width: 52ch;
+    margin: 18px 0 28px;
   }
 
   .emph-gold {
@@ -395,18 +396,19 @@ const faqs = [
   /* Hero areas (4 small pills) */
   .hero-areas {
     list-style: none;
-    margin: 0 0 36px;
+    margin: 0 0 28px;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(4, auto);
-    gap: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 28px;
     align-items: start;
   }
 
   .hero-areas li {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
+    flex: 0 0 auto;
   }
 
   .hero-areas svg {
@@ -418,26 +420,18 @@ const faqs = [
 
   .hero-areas span {
     font-family: var(--sans);
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--navy);
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    line-height: 1.35;
-    padding-top: 4px;
-  }
-
-  @media (max-width: 720px) {
-    .hero-areas {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
-    }
+    line-height: 1.3;
   }
 
   .hero-ctas {
     display: flex;
     gap: 12px;
-    margin-top: 8px;
+    margin-top: 4px;
     flex-wrap: wrap;
   }
 
@@ -445,9 +439,9 @@ const faqs = [
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    margin-top: 24px;
+    margin-top: 20px;
     color: var(--muted);
-    font-size: 0.92rem;
+    font-size: 0.9rem;
   }
 
   .hero-reassurance svg {
@@ -464,13 +458,13 @@ const faqs = [
 
   .portrait-frame {
     border: 1px solid var(--gold);
-    padding: 12px;
+    padding: 8px;
     background: var(--cream);
     position: relative;
   }
 
   .portrait-photo {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 1 / 1.05;
     background:
       linear-gradient(135deg, #2a4060 0%, var(--navy) 100%);
     position: relative;
@@ -530,11 +524,11 @@ const faqs = [
   .portrait-tagline {
     background: var(--navy);
     color: var(--gold);
-    padding: 22px 28px;
+    padding: 20px 26px;
     display: flex;
     align-items: center;
     gap: 18px;
-    margin-top: 12px;
+    margin-top: 0;
   }
 
   .portrait-tagline svg {
