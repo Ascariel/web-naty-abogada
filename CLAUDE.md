@@ -21,7 +21,7 @@ Prefix every `npm` / `npx` invocation with that, including in subshells.
 | Command | Use |
 | --- | --- |
 | `npm install` | Install dependencies |
-| `npm run dev` | Dev server at `http://localhost:4321/web-naty-abogada/` (note the base path) |
+| `npm run dev` | Dev server at `http://localhost:4321/` (no base prefix in dev — see below) |
 | `npm run build` | Build static site into `dist/` |
 | `npm run preview` | Serve the built `dist/` locally |
 
@@ -40,7 +40,14 @@ There is no test suite, no linter, and no formatter configured. `npm run build` 
 
 ## The `path()` helper — do not skip
 
-The site is hosted under a base path (`/web-naty-abogada` in production, `/web-naty-abogada` in dev too because of the Astro config). **Hardcoded `href="/foo"` links break in production** — they resolve to `https://ascariel.github.io/foo` (404) instead of the project URL.
+The site is hosted under a base path in production (`/web-naty-abogada` on GitHub Pages). In dev the base is `/` so the dev server matches a normal local-dev experience. The conditional lives at the top of `astro.config.mjs`:
+
+```js
+const isDev = process.argv.includes('dev');
+base: isDev ? '/' : '/web-naty-abogada',
+```
+
+**Hardcoded `href="/foo"` links break in production** — they resolve to `https://ascariel.github.io/foo` (404) instead of the project URL.
 
 Every internal link must flow through `path()` from `src/data/site.ts`:
 
@@ -62,7 +69,7 @@ Repo settings have `build_type: workflow` (configured once via `gh api -X POST /
 
 ## Migrating to a custom domain (when registered)
 
-1. In `astro.config.mjs`: change `site` to the domain and **remove** `base`.
+1. In `astro.config.mjs`: change `site` to the domain and **drop the conditional** so `base` is just `'/'` in both dev and prod (or remove `base` entirely).
 2. In `public/robots.txt`: update the sitemap URL.
 3. Add `public/CNAME` containing the bare domain (e.g. `nataliavallejos.cl`).
 4. At the registrar (NIC.cl), point `A` records for the apex to `185.199.108.153`/`.109`/`.110`/`.111`, and a `CNAME` for `www` to `ascariel.github.io`.
@@ -70,7 +77,7 @@ Repo settings have `build_type: workflow` (configured once via `gh api -X POST /
 
 ## Conventions worth knowing
 
-- **Trailing slashes:** `astro.config.mjs` sets `trailingSlash: 'never'`, but GitHub Pages adds them on inner routes anyway. The 301 → 200 chain works; the canonical URL in `<head>` matches the no-trailing-slash version.
+- **Trailing slashes:** `astro.config.mjs` sets `trailingSlash: 'ignore'`, so both `/foo` and `/foo/` resolve to the same page in dev and prod. GitHub Pages still 301s inner routes to add a trailing slash; that chain works fine.
 - **WhatsApp float stays green** (`#25d366`). It's a near-universal convention in Chilean lawyer sites — research confirmed this is what users recognize. The header CTA and inline buttons use the brand navy/gold; only the floating bubble is green.
 - **Pricing** is published as "desde $X" ranges (validated against Chilean solo-practice market 2025–2026). The single source is `services.ts` — never duplicate price strings into Astro pages.
 - **No emojis or rounded corners** in the visual language. The look is "premium clásico" — navy + gold + ivory cream, square corners, serif headlines (Cormorant Garamond) with italic-gold emphasis spans, sans body (Inter) with letter-spaced uppercase for nav and CTAs. Both fonts are self-hosted via `@fontsource` (no Google Fonts CDN).
