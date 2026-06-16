@@ -273,7 +273,7 @@ const faqs = [
 
 <style>
   .hero {
-    padding-block: clamp(12px, 1.7vw, 23px);
+    padding-block: clamp(62px, 1.7vw, 42px);
     background: var(--cream);
   }
 
@@ -385,6 +385,23 @@ const faqs = [
     height: 18px;
     color: var(--gold);
     flex-shrink: 0;
+  }
+
+  /* Phones: the <br> spacers read as oversized gaps and the area pills wrap
+     unevenly. Tidy both up here only — desktop is untouched. */
+  @media (max-width: 600px) {
+    /* Hide just the direct-child spacers, not the <br> inside pill labels. */
+    .hero-inner > br { display: none; }
+
+    .hero-areas {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      justify-content: center;
+      gap: 16px 26px;
+      margin-top: 20px;
+    }
+
+    .hero-areas li { justify-content: flex-start; }
   }
 
   /* Reassurance bar (4-up) */
