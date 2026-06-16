@@ -1,8 +1,9 @@
 ---
 // Internal analytics dashboard. Access is gated by functions/_middleware.ts
 // (HTTP Basic Auth: admin / ADMIN_PASSWORD). Standalone — it deliberately does
-// not use Base.astro (no public header/footer/WhatsApp float). Data comes from
-// /api/stats, which the browser calls with the same Basic Auth credentials.
+// not use Base.astro. Data comes from /api/stats, which the browser calls with
+// the same Basic Auth credentials. Shows, for every event type, both total
+// (non-unique) and unique (by IP per day) counts over time.
 ---
 
 <!doctype html>
@@ -11,25 +12,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Estadísticas de visitas — Admin</title>
+    <title>Estadísticas — Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
     <main class="wrap">
       <header class="head">
-        <h1>Estadísticas de visitas</h1>
-        <p class="sub">tranquilidadlegal.cl · visitas registradas (bots excluidos)</p>
+        <h1>Estadísticas de eventos</h1>
+        <p class="sub">tranquilidadlegal.cl · eventos registrados (bots excluidos)</p>
       </header>
 
       <form id="filters" class="filters">
-        <label>
-          Desde
-          <input type="date" id="from" name="from" />
-        </label>
-        <label>
-          Hasta
-          <input type="date" id="to" name="to" />
-        </label>
+        <label>Desde<input type="date" id="from" name="from" /></label>
+        <label>Hasta<input type="date" id="to" name="to" /></label>
         <label>
           Agrupar por
           <select id="granularity" name="granularity">
@@ -41,33 +36,27 @@
         <button type="submit">Aplicar</button>
       </form>
 
-      <section class="cards">
-        <div class="card">
-          <span class="card-label">Visitas totales</span>
-          <span class="card-value" id="total-views">—</span>
-        </div>
-        <div class="card">
-          <span class="card-label">Visitas únicas</span>
-          <span class="card-value" id="total-uniques">—</span>
-        </div>
-        <div class="card">
-          <span class="card-label">Rango</span>
-          <span class="card-value small" id="range-label">—</span>
-        </div>
-      </section>
-
-      <section class="chart-box">
-        <canvas id="chart" height="110"></canvas>
-        <p class="empty" id="empty" hidden>Sin datos en este rango.</p>
-      </section>
-
-      <section class="table-box">
-        <table id="table">
+      <section class="summary">
+        <table id="summary-table">
           <thead>
-            <tr><th>Periodo</th><th>Visitas</th><th>Únicas</th></tr>
+            <tr><th>Evento</th><th>Total</th><th>Únicas (IP·día)</th></tr>
           </thead>
           <tbody></tbody>
         </table>
+      </section>
+
+      <section class="chart-box">
+        <h2>Eventos totales</h2>
+        <p class="hint">Cuenta cada acción, incluso repetida por la misma persona.</p>
+        <div class="canvas-holder"><canvas id="chart-total"></canvas></div>
+        <p class="empty" id="empty-total" hidden>Sin datos en este rango.</p>
+      </section>
+
+      <section class="chart-box">
+        <h2>Eventos únicos</h2>
+        <p class="hint">Una sola vez por IP por día, para cada tipo de evento.</p>
+        <div class="canvas-holder"><canvas id="chart-unique"></canvas></div>
+        <p class="empty" id="empty-unique" hidden>Sin datos en este rango.</p>
       </section>
 
       <p class="status" id="status"></p>
@@ -82,20 +71,30 @@
           return z.toISOString().slice(0, 10);
         };
 
+        // Friendly labels + colors per known event type.
+        const EVENT_META = {
+          page_view: { label: 'Vistas de página', color: '#0e2a47' },
+          whatsapp_btn_click: { label: 'Clics WhatsApp', color: '#25d366' },
+          contact_info_click: { label: 'Clics datos de contacto', color: '#c9a864' },
+        };
+        const FALLBACK = ['#8a6d3b', '#5b7c99', '#a0522d', '#556b2f', '#6a5acd', '#b8553a'];
+        const meta = (type, i) =>
+          EVENT_META[type] || { label: type, color: FALLBACK[i % FALLBACK.length] };
+
         // Default range: last 30 days.
         const today = new Date();
         const past = new Date(today.getTime() - 29 * 86400000);
         $('from').value = isoLocal(past);
         $('to').value = isoLocal(today);
 
-        let chart = null;
+        let totalChart = null;
+        let uniqueChart = null;
 
         async function load() {
           const from = $('from').value;
           const to = $('to').value;
           const granularity = $('granularity').value;
           $('status').textContent = 'Cargando…';
-
           let data;
           try {
             const res = await fetch(
@@ -112,81 +111,72 @@
           render(data);
         }
 
-        function render(data) {
-          $('total-views').textContent = fmtNum(data.totals.views);
-          $('total-uniques').textContent = fmtNum(data.totals.uniques);
-          $('range-label').textContent = `${data.from} → ${data.to}`;
+        function buildDatasets(data, kind) {
+          return data.eventTypes.map((t, i) => {
+            const m = meta(t, i);
+            return {
+              label: m.label,
+              data: (data.series[t] && data.series[t][kind]) || [],
+              borderColor: m.color,
+              backgroundColor: m.color + '22',
+              tension: 0.25,
+              fill: false,
+              pointRadius: 2,
+              borderWidth: 2,
+            };
+          });
+        }
 
-          const rows = data.rows || [];
-          const labels = rows.map((r) => r.period);
-          const views = rows.map((r) => r.views);
-          const uniques = rows.map((r) => r.uniques);
-
-          // Table
-          const tbody = document.querySelector('#table tbody');
-          tbody.innerHTML = rows
-            .map(
-              (r) =>
-                `<tr><td>${r.period}</td><td>${fmtNum(r.views)}</td><td>${fmtNum(
-                  r.uniques
-                )}</td></tr>`
-            )
-            .join('');
-
-          // Chart
-          const empty = $('empty');
-          const canvas = $('chart');
-          if (!rows.length) {
-            empty.hidden = false;
-            canvas.style.display = 'none';
-            if (chart) { chart.destroy(); chart = null; }
-            return;
+        function drawChart(existing, canvasId, emptyId, data, kind) {
+          const hasData = data.periods.length > 0 && data.eventTypes.length > 0;
+          const canvas = $(canvasId);
+          $(emptyId).hidden = hasData;
+          canvas.style.display = hasData ? '' : 'none';
+          if (!hasData) {
+            if (existing) { existing.destroy(); }
+            return null;
           }
-          empty.hidden = true;
-          canvas.style.display = '';
-
           const cfg = {
             type: 'line',
-            data: {
-              labels,
-              datasets: [
-                {
-                  label: 'Visitas',
-                  data: views,
-                  borderColor: '#0e2a47',
-                  backgroundColor: 'rgba(14,42,71,0.08)',
-                  tension: 0.25,
-                  fill: true,
-                  pointRadius: 3,
-                },
-                {
-                  label: 'Únicas',
-                  data: uniques,
-                  borderColor: '#c9a864',
-                  backgroundColor: 'rgba(201,168,100,0.10)',
-                  tension: 0.25,
-                  fill: true,
-                  pointRadius: 3,
-                },
-              ],
-            },
+            data: { labels: data.periods, datasets: buildDatasets(data, kind) },
             options: {
               responsive: true,
               maintainAspectRatio: false,
               interaction: { mode: 'index', intersect: false },
-              scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } },
-              },
+              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
               plugins: { legend: { position: 'top' } },
             },
           };
-
-          if (chart) {
-            chart.data = cfg.data;
-            chart.update();
-          } else {
-            chart = new Chart(canvas.getContext('2d'), cfg);
+          if (existing) {
+            existing.data = cfg.data;
+            existing.update();
+            return existing;
           }
+          return new Chart(canvas.getContext('2d'), cfg);
+        }
+
+        function render(data) {
+          // Summary table
+          const tbody = document.querySelector('#summary-table tbody');
+          if (!data.eventTypes.length) {
+            tbody.innerHTML =
+              '<tr><td colspan="3" class="muted">Sin eventos en este rango.</td></tr>';
+          } else {
+            tbody.innerHTML = data.eventTypes
+              .map((t, i) => {
+                const m = meta(t, i);
+                const tot = data.totals[t] || { total: 0, unique: 0 };
+                return `<tr>
+                  <td><span class="dot" style="background:${m.color}"></span>${m.label}</td>
+                  <td>${fmtNum(tot.total)}</td>
+                  <td>${fmtNum(tot.unique)}</td>
+                </tr>`;
+              })
+              .join('');
+          }
+
+          totalChart = drawChart(totalChart, 'chart-total', 'empty-total', data, 'total');
+          uniqueChart = drawChart(uniqueChart, 'chart-unique', 'empty-unique', data, 'unique');
         }
 
         $('filters').addEventListener('submit', (e) => {
@@ -194,7 +184,6 @@
           load();
         });
 
-        // Chart.js is loaded with `defer`; wait for it before first render.
         function start() {
           if (window.Chart) load();
           else setTimeout(start, 50);
@@ -224,94 +213,50 @@
       .sub { margin: 0 0 24px; color: var(--muted); font-size: 0.9rem; }
 
       .filters {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: end;
-        gap: 16px;
-        background: #fff;
-        border: 1px solid var(--border);
-        padding: 18px;
-        border-radius: 8px;
-        margin-bottom: 24px;
+        display: flex; flex-wrap: wrap; align-items: end; gap: 16px;
+        background: #fff; border: 1px solid var(--border);
+        padding: 18px; border-radius: 8px; margin-bottom: 24px;
       }
       .filters label {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
+        display: flex; flex-direction: column; gap: 4px;
+        font-size: 0.78rem; font-weight: 600; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.04em;
       }
-      .filters input,
-      .filters select {
-        font: inherit;
-        padding: 9px 10px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        background: #fff;
-        color: #1a1a1a;
+      .filters input, .filters select {
+        font: inherit; padding: 9px 10px; border: 1px solid var(--border);
+        border-radius: 6px; background: #fff; color: #1a1a1a;
       }
       .filters button {
-        font: inherit;
-        font-weight: 600;
-        padding: 10px 22px;
-        border: 0;
-        border-radius: 6px;
-        background: var(--navy);
-        color: var(--cream);
-        cursor: pointer;
+        font: inherit; font-weight: 600; padding: 10px 22px; border: 0;
+        border-radius: 6px; background: var(--navy); color: var(--cream); cursor: pointer;
       }
       .filters button:hover { background: #14375c; }
 
-      .cards {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
-        margin-bottom: 24px;
+      .summary {
+        background: #fff; border: 1px solid var(--border);
+        border-radius: 8px; overflow: hidden; margin-bottom: 24px;
       }
-      .card {
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 18px 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .card-label {
-        font-size: 0.74rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--muted);
-        font-weight: 600;
-      }
-      .card-value { font-size: 2rem; font-weight: 700; color: var(--navy); }
-      .card-value.small { font-size: 1rem; font-weight: 600; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
+      th, td { padding: 11px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+      th { background: #faf7ee; color: var(--navy); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; }
+      tbody tr:last-child td { border-bottom: 0; }
+      td:nth-child(2), td:nth-child(3), th:nth-child(2), th:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; }
+      .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: baseline; }
+      .muted { color: var(--muted); text-align: center; }
 
       .chart-box {
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 24px;
-        min-height: 280px;
-        position: relative;
+        background: #fff; border: 1px solid var(--border);
+        border-radius: 8px; padding: 20px; margin-bottom: 24px;
       }
-      .empty { text-align: center; color: var(--muted); padding: 60px 0; }
+      .chart-box h2 { margin: 0 0 2px; color: var(--navy); font-size: 1.1rem; }
+      .hint { margin: 0 0 14px; color: var(--muted); font-size: 0.84rem; }
+      .canvas-holder { position: relative; height: 300px; }
+      .empty { text-align: center; color: var(--muted); padding: 40px 0; }
 
-      .table-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-      table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
-      th, td { padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); }
-      th { background: #faf7ee; color: var(--navy); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; }
-      tbody tr:last-child td { border-bottom: 0; }
-      td:nth-child(2), td:nth-child(3), th:nth-child(2), th:nth-child(3) { text-align: right; }
-
-      .status { color: var(--muted); font-size: 0.88rem; margin-top: 16px; min-height: 1.2em; }
+      .status { color: var(--muted); font-size: 0.88rem; margin-top: 8px; min-height: 1.2em; }
 
       @media (max-width: 640px) {
-        .cards { grid-template-columns: 1fr; }
+        .canvas-holder { height: 240px; }
       }
     </style>
   </body>

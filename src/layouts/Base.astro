@@ -83,21 +83,45 @@ const baseJsonLd = {
     <Footer />
     <WhatsAppFloat />
 
-    <!-- Visit beacon → /api/track (Cloudflare Function). Fire-and-forget, bots
-         excluded server-side. Skips localhost, the GitHub Pages mirror, and
-         the gated /admin pages. -->
+    <!-- Event beacon → /api/track (Cloudflare Function). Fire-and-forget, bots
+         excluded server-side. Tracks page_view on load plus WhatsApp and
+         contact-info clicks site-wide (delegated). Skips localhost, the GitHub
+         Pages mirror, and the gated /admin pages. -->
     <script is:inline>
       (function () {
         try {
           var h = location.hostname;
           if (/localhost|127\.|0\.0\.0\.0|github\.io/.test(h)) return;
-          if (location.pathname.indexOf('/admin') === 0) return;
-          var payload = JSON.stringify({ path: location.pathname });
-          if (navigator.sendBeacon) {
-            navigator.sendBeacon('/api/track', payload);
-          } else {
-            fetch('/api/track', { method: 'POST', body: payload, keepalive: true });
+
+          function track(type, path) {
+            try {
+              var payload = JSON.stringify({ type: type, path: path || location.pathname });
+              if (navigator.sendBeacon) {
+                navigator.sendBeacon('/api/track', payload);
+              } else {
+                fetch('/api/track', { method: 'POST', body: payload, keepalive: true });
+              }
+            } catch (e) {}
           }
+
+          if (location.pathname.indexOf('/admin') !== 0) {
+            track('page_view', location.pathname);
+          }
+
+          document.addEventListener(
+            'click',
+            function (e) {
+              var a = e.target && e.target.closest ? e.target.closest('a') : null;
+              if (!a) return;
+              var href = a.getAttribute('href') || '';
+              if (/wa\.me|api\.whatsapp\.com|whatsapp/i.test(href)) {
+                track('whatsapp_btn_click', href);
+              } else if (/^mailto:|^tel:/i.test(href)) {
+                track('contact_info_click', href);
+              }
+            },
+            true
+          );
         } catch (e) {}
       })();
     </script>

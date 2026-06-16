@@ -70,20 +70,31 @@ Both deploys come from the same commit; the difference is which env var is prese
 
 ## Analytics / visit tracking (Cloudflare only)
 
-A small backend tracks page views and powers a password-gated dashboard at **`/admin`**.
-It runs only on Cloudflare Pages (the GitHub Pages mirror has no Functions/D1; the beacon
-is guarded off there).
+A small backend tracks **events** (page views + interactions) and powers a password-gated
+dashboard at **`/admin`**. It runs only on Cloudflare Pages (the GitHub Pages mirror has no
+Functions/D1; the beacon is guarded off there).
+
+**Event model.** Everything is rows in a single `events` table with an `event_type` column
+(`page_view`, `whatsapp_btn_click`, `contact_info_click`, …). Every event type is counted two
+ways: **total** (every action, even repeated) and **unique** (one per IP per day). Add a new
+event type by just sending it from the client — no schema change; the dashboard picks it up
+automatically.
 
 **How it works**
-- `src/layouts/Base.astro` has a fire-and-forget beacon that POSTs to `/api/track` on every
-  page load (skips localhost, `*.github.io`, and `/admin*`).
-- `functions/api/track.ts` records the view in **D1**. Bots are excluded by User-Agent. Privacy:
-  it stores `SHA-256(IP_SALT | ip | day)`, **never the raw IP** — that still gives one unique
-  per IP per day (the day is baked into the hash).
-- `functions/api/stats.ts` returns counts aggregated by `day | week | month`, filterable by date.
+- `src/layouts/Base.astro` has a fire-and-forget beacon that POSTs to `/api/track`: a
+  `page_view` on load, plus a delegated click listener that sends `whatsapp_btn_click` for
+  `wa.me`/WhatsApp links and `contact_info_click` for `mailto:`/`tel:` links, site-wide.
+  Skips localhost, `*.github.io`, and `/admin*`.
+- `functions/api/track.ts` records the event in **D1**. `event_type` is validated against
+  `^[a-z][a-z0-9_]{0,39}$`. Bots excluded by User-Agent. Privacy: stores
+  `SHA-256(IP_SALT | ip | day)`, **never the raw IP** — still gives one unique per IP per day.
+- `functions/api/stats.ts` returns, per event type, total + unique series aggregated by
+  `day | week | month`, filterable by date.
 - `functions/_middleware.ts` gates `/admin` and `/api/stats` with HTTP Basic Auth
   (`admin` / `ADMIN_PASSWORD`). It **fails closed** if the secret isn't set.
-- `src/pages/admin.astro` is the dashboard (Chart.js via CDN). Schema lives in `migrations/0001_init.sql`.
+- `src/pages/admin.astro` is the dashboard (Chart.js via CDN): a summary table plus two charts
+  — "Eventos totales" and "Eventos únicos" — each with one line per event type. Schema lives in
+  `migrations/0001_init.sql` (the `events` table).
 
 **One-time setup — all in the Cloudflare dashboard** (Workers & Pages → the Pages project).
 The repo intentionally has **no `wrangler.toml`** (a committed one would override dashboard

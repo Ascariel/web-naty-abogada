@@ -1,8 +1,18 @@
 /**
  * GET /api/stats?from=YYYY-MM-DD&to=YYYY-MM-DD&granularity=day|week|month
  *
- * Returns visit counts aggregated by the chosen period. Auth is enforced by
- * functions/_middleware.ts (this path is gated), so no auth check is needed here.
+ * Returns event counts aggregated by period AND event type, both total
+ * (non-unique) and unique (distinct IP per day). Auth is enforced by
+ * functions/_middleware.ts, so no auth check is needed here.
+ *
+ * Response:
+ * {
+ *   granularity, from, to,
+ *   periods: string[],                    // sorted period labels in range
+ *   eventTypes: string[],                 // event types seen, page_view first
+ *   series: { [type]: { total: number[], unique: number[] } },  // aligned to periods
+ *   totals: { [type]: { total: number, unique: number } }
+ * }
  */
 
 interface Env {
@@ -11,7 +21,6 @@ interface Env {
 
 type Granularity = 'day' | 'week' | 'month';
 
-// SQLite expression that maps a `day` (YYYY-MM-DD) to a period label.
 const PERIOD_SQL: Record<Granularity, string> = {
   day: 'day',
   week: "strftime('%Y-W%W', day)",
@@ -24,6 +33,13 @@ function isoDay(d: Date): string {
 
 function clampDate(value: string | null, fallback: string): string {
   return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : fallback;
+}
+
+interface Row {
+  period: string;
+  event_type: string;
+  total: number;
+  uniques: number;
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -43,17 +59,18 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 
   const sql = `
     SELECT ${period} AS period,
-           COUNT(*) AS views,
+           event_type,
+           COUNT(*) AS total,
            COUNT(DISTINCT ip_hash) AS uniques
-    FROM page_views
+    FROM events
     WHERE day BETWEEN ?1 AND ?2
-    GROUP BY period
+    GROUP BY period, event_type
     ORDER BY period`;
 
-  let rows: Array<{ period: string; views: number; uniques: number }> = [];
+  let rows: Row[] = [];
   try {
     const result = await env.DB.prepare(sql).bind(from, to).all();
-    rows = (result.results ?? []) as typeof rows;
+    rows = (result.results ?? []) as unknown as Row[];
   } catch (err) {
     return Response.json(
       { error: 'query_failed', detail: String(err) },
@@ -61,17 +78,38 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     );
   }
 
-  const totals = rows.reduce(
-    (acc, r) => {
-      acc.views += r.views;
-      acc.uniques += r.uniques;
-      return acc;
-    },
-    { views: 0, uniques: 0 }
-  );
+  // Distinct, sorted periods.
+  const periods = [...new Set(rows.map((r) => r.period))].sort();
+  const periodIndex = new Map(periods.map((p, i) => [p, i]));
+
+  // Event types: keep page_view first, then the rest alphabetically.
+  const typeSet = new Set(rows.map((r) => r.event_type));
+  const eventTypes = [...typeSet].sort((a, b) => {
+    if (a === 'page_view') return -1;
+    if (b === 'page_view') return 1;
+    return a.localeCompare(b);
+  });
+
+  const series: Record<string, { total: number[]; unique: number[] }> = {};
+  const totals: Record<string, { total: number; unique: number }> = {};
+  for (const t of eventTypes) {
+    series[t] = {
+      total: new Array(periods.length).fill(0),
+      unique: new Array(periods.length).fill(0),
+    };
+    totals[t] = { total: 0, unique: 0 };
+  }
+
+  for (const r of rows) {
+    const i = periodIndex.get(r.period)!;
+    series[r.event_type].total[i] = r.total;
+    series[r.event_type].unique[i] = r.uniques;
+    totals[r.event_type].total += r.total;
+    totals[r.event_type].unique += r.uniques;
+  }
 
   return Response.json(
-    { granularity, from, to, rows, totals },
+    { granularity, from, to, periods, eventTypes, series, totals },
     { headers: { 'Cache-Control': 'no-store' } }
   );
 };

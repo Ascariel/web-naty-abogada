@@ -1,9 +1,11 @@
 /**
- * POST /api/track — records a single page view.
+ * POST /api/track — records a single event.
  *
- * Public (no auth). Called fire-and-forget by a beacon in Base.astro.
+ * Public (no auth). Called fire-and-forget by beacons in Base.astro.
+ * Body: { type?: string, path?: string }. `type` defaults to "page_view".
+ *
  * Privacy: we never store the raw IP — only SHA-256(IP_SALT | ip | day), which
- * still lets us count one unique visitor per IP per day.
+ * still lets us count one unique actor per IP per day for each event type.
  */
 
 interface Env {
@@ -16,8 +18,10 @@ interface Env {
 const BOT_RE =
   /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|slackbot|whatsapp|telegrambot|discordbot|embedly|skypeuripreview|headless|lighthouse|gpt|python-requests|axios|curl|wget|node-fetch|phantom|puppeteer|playwright|preview|monitor|pingdom|uptime/i;
 
+// Event types we accept. Keep it a simple validated slug to avoid junk/abuse.
+const EVENT_TYPE_RE = /^[a-z][a-z0-9_]{0,39}$/;
+
 function santiagoDay(now: Date): string {
-  // en-CA formats as YYYY-MM-DD
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Santiago',
     year: 'numeric',
@@ -36,9 +40,24 @@ async function sha256Hex(input: string): Promise<string> {
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const ua = request.headers.get('User-Agent') ?? '';
-  // Drop bots and obviously empty UAs.
   if (!ua || BOT_RE.test(ua)) {
     return new Response(null, { status: 204 });
+  }
+
+  let eventType = 'page_view';
+  let path = '/';
+  try {
+    const body = (await request.json()) as { type?: string; path?: string } | null;
+    if (body) {
+      if (typeof body.type === 'string' && EVENT_TYPE_RE.test(body.type)) {
+        eventType = body.type;
+      }
+      if (typeof body.path === 'string') {
+        path = body.path.slice(0, 256);
+      }
+    }
+  } catch {
+    // No/invalid body → default page_view at "/".
   }
 
   const ip =
@@ -50,26 +69,13 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const salt = env.IP_SALT ?? 'no-salt';
   const ipHash = await sha256Hex(`${salt}|${ip}|${day}`);
 
-  // Best-effort read of the path the beacon reported.
-  let path = '/';
-  try {
-    const body = (await request.json()) as { path?: string } | null;
-    if (body && typeof body.path === 'string') {
-      path = body.path.slice(0, 256);
-    }
-  } catch {
-    // sendBeacon may post text/plain; try that.
-    // (Body already consumed on failure is fine — keep default path.)
-  }
-
   try {
     await env.DB.prepare(
-      'INSERT INTO page_views (day, ip_hash, path, created_at) VALUES (?, ?, ?, ?)'
+      'INSERT INTO events (day, event_type, ip_hash, path, created_at) VALUES (?, ?, ?, ?, ?)'
     )
-      .bind(day, ipHash, path, Date.now())
+      .bind(day, eventType, ipHash, path, Date.now())
       .run();
   } catch {
-    // Never let a tracking failure surface to the visitor.
     return new Response(null, { status: 204 });
   }
 
