@@ -82,6 +82,21 @@
         const FALLBACK = ['#7c3aed', '#0891b2', '#dc2626', '#4f46e5', '#db2777', '#65a30d'];
         const meta = (t, i) => EVENT_META[t] || { label: t, color: FALLBACK[i % FALLBACK.length] };
 
+        // Title-case for graph labels/legends. Uppercases each word's first
+        // letter (preserving the rest, so "WhatsApp"/"VIF" survive) and keeps
+        // Spanish connectors lowercase unless they're the first word.
+        const MINOR = new Set(['de','del','la','el','los','las','y','e','o','u','en','a','al','por','para','con','un','una']);
+        function titleCase(s) {
+          return String(s)
+            .split(' ')
+            .map((w, i) => {
+              if (!w) return w;
+              if (i > 0 && MINOR.has(w.toLowerCase())) return w.toLowerCase();
+              return w.charAt(0).toUpperCase() + w.slice(1);
+            })
+            .join(' ');
+        }
+
         // Friendly page names for the pie chart legend.
         const PAGE_LABELS = {
           '/': 'Inicio',
@@ -253,7 +268,7 @@
             card.className = 'card chart-card';
             card.innerHTML = `
               <div class="card-head">
-                <div class="ch-title"><span class="ch-dot" style="background:${m.color}"></span><h2>${m.label}</h2></div>
+                <div class="ch-title"><span class="ch-dot" style="background:${m.color}"></span><h2>${titleCase(m.label)}</h2></div>
                 <div class="ch-meta">${metricLabel} <strong>${fmt(tot[metric])}</strong></div>
               </div>
               <div class="canvas-holder"><canvas></canvas></div>`;
@@ -268,7 +283,7 @@
           const valueKey = metric === 'unique' ? 'uniques' : 'total';
           const pageData = pages.filter((p) => p[valueKey] > 0);
           if (pageData.length) {
-            const labels = pageData.map((p) => pageLabel(p.path));
+            const labels = pageData.map((p) => titleCase(pageLabel(p.path)));
             const values = pageData.map((p) => p[valueKey]);
             const colors = pageData.map((_, i) => PIE_COLORS[i % PIE_COLORS.length]);
             const pieMeta = metric === 'unique' ? 'Visitas únicas por página' : 'Visitas totales por página';
@@ -276,7 +291,7 @@
             card.className = 'card chart-card';
             card.innerHTML = `
               <div class="card-head">
-                <div class="ch-title"><h2>Páginas visitadas</h2></div>
+                <div class="ch-title"><h2>${titleCase('Páginas visitadas')}</h2></div>
                 <div class="ch-meta">${pieMeta}</div>
               </div>
               <div class="canvas-holder"><canvas></canvas></div>`;
