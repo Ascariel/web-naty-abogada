@@ -1,124 +1,133 @@
 ---
 import Base from '../layouts/Base.astro';
 import { site, whatsappLink } from '../data/site';
+
+const values = [
+  {
+    title: 'Cercanía',
+    text: 'Atiendo personalmente cada caso. No te atenderá un asistente: me tendrás a mí en cada audiencia y en cada conversación.',
+  },
+  {
+    title: 'Transparencia',
+    text: 'Honorarios fijos, presupuesto por escrito antes de comenzar y reportes del avance en cada etapa.',
+  },
+  {
+    title: 'Confidencialidad',
+    text: 'Todo lo que compartes conmigo está amparado por el secreto profesional.',
+  },
+  {
+    title: 'Realismo',
+    text: 'Te diré las posibilidades reales de tu caso —las buenas y las difíciles— para que decidas con información.',
+  },
+];
 ---
 
 <Base
   title="Sobre mí"
-  description="Conoce a Natalia Vallejos Gutiérrez, abogada en Santiago especializada en Derecho de Familia. Trayectoria, formación y enfoque profesional."
+  description="Conoce a Natalia Vallejos Gutiérrez, abogada en Santiago especializada en Derecho de Familia, violencia intrafamiliar y derechos humanos. Trayectoria, formación y enfoque profesional."
 >
+  <!-- INTRO + BIO -->
   <section class="section">
-    <div class="container container--narrow">
-      <span class="eyebrow">Sobre mí</span>
-      <h1>Hola, soy Natalia Vallejos Gutiérrez.</h1>
-      <p class="lead">
-        Abogada en Santiago con enfoque en Derecho de Familia, Violencia
-        Intrafamiliar y Derechos Humanos. Te acompaño en los momentos más
-        complejos de tu vida con asesoría humana, técnica y honesta.
-      </p>
-    </div>
-  </section>
-
-  <section class="section section--cream-warm">
     <div class="container about-grid">
       <div class="about-photo">
-        <!-- TODO: replace with real photo -->
-        <div class="photo-placeholder">
+        <!-- TODO: reemplazar por foto profesional de Natalia -->
+        <div class="photo-placeholder" aria-hidden="true">
           <span class="photo-mark">NV</span>
-          <span class="photo-caption">Foto profesional</span>
+          <span class="photo-caption">Natalia Vallejos · Abogada</span>
         </div>
       </div>
 
       <div class="about-text">
-        <h2>Mi trayectoria</h2>
-        <p>
-          Soy {site.degree} por la {site.university} y abogada habilitada
-          ante la Excma. Corte Suprema en {site.yearAdmitted}. Mi enfoque
-          profesional combina el Derecho de Familia, la Violencia
-          Intrafamiliar (VIF) y los Derechos Humanos.
-        </p>
-        <p>
-          Mi formación práctica se construyó en dos espacios fundamentales:
-          el <strong>SernamEG, Centro de la Mujer de Quilicura</strong>,
-          donde representé a víctimas de violencia intrafamiliar en sede
-          penal y coordiné con URAVIT de la Fiscalía; y la
-          <strong>Corporación de Asistencia Judicial</strong>, donde
-          tramité 103 causas en Tribunales de Familia y Centros de Medidas
-          Cautelares, logrando el cierre efectivo de 62 de ellas
-          (calificación de práctica: 6,9 / 7,0).
-        </p>
-        <p>
-          Actualmente ejerzo como procuradora particular en materias de
-          Familia y curso un <strong>Diplomado en Gobierno Corporativo y
-          Compliance</strong> en la Facultad de Derecho de la Universidad
-          de Chile, formación que complementa mi trabajo con una mirada
-          rigurosa sobre integridad institucional y gestión de riesgos
-          legales.
-        </p>
-        <p>
-          Atiendo casos de toda la Región Metropolitana y del resto de
-          Chile a través de las audiencias por videoconferencia, con
-          dominio avanzado de la Oficina Judicial Virtual (OJV).
+        <span class="eyebrow">Sobre mí</span>
+        <h1>Hola, soy Natalia Vallejos.</h1>
+        <p class="lead">
+          Abogada y litigante en Derecho de Familia. Acompaño a personas y
+          familias en los procesos que tocan lo más íntimo de su vida, con una
+          asesoría cercana, técnica y honesta.
         </p>
 
-        <h3 style="margin-top: 32px;">Experiencia profesional</h3>
-        <ul class="credentials">
-          <li>
-            <strong>Procuradora Particular</strong> · 2026 al presente<br />
-            <span class="muted">Asesoría legal y representación judicial en materias de familia. Redacción y revisión de escritos judiciales y extrajudiciales.</span>
-          </li>
-          <li>
-            <strong>Práctica profesional · Corporación de Asistencia Judicial</strong> · 2025 – 2026<br />
-            <span class="muted">Tramitación integral de 103 causas en Tribunales de Familia y Centros de Medidas Cautelares, con 62 cierres efectivos. Representación judicial en cuidado personal, alimentos, relación directa y regular, divorcios, filiación, autorización de salida del país, VIF y medidas de protección. Calificación 6,9 / 7,0.</span>
-          </li>
-          <li>
-            <strong>Práctica profesional · SernamEG, Centro de la Mujer Quilicura</strong> · 2023 – 2024<br />
-            <span class="muted">Tramitación de causas en sede penal por violencia intrafamiliar en contextos de pareja. Coordinación interinstitucional con URAVIT de la Fiscalía para la representación de víctimas. Participación en campañas de sensibilización y prevención de la violencia de género.</span>
-          </li>
-        </ul>
+        <p>
+          Trabajo separaciones, pensiones de alimentos, cuidado personal y
+          situaciones de violencia intrafamiliar. Elegí estas materias porque
+          detrás de cada expediente hay una persona tomando una de las
+          decisiones más importantes de su vida, y merece ser escuchada y bien
+          representada.
+        </p>
+        <p>
+          Mi experiencia se forjó en tribunales reales. En mi práctica en la
+          <strong>Corporación de Asistencia Judicial</strong> tramité 103
+          causas en Tribunales de Familia y logré el cierre efectivo de 62, con
+          calificación 6,9/7,0. Antes, en el <strong>SernamEG, Centro de la
+          Mujer de Quilicura</strong>, representé a víctimas de violencia
+          intrafamiliar coordinando directamente con la Fiscalía.
+        </p>
+        <p>
+          Hoy ejerzo de forma independiente y atiendo a clientes de toda la
+          Región Metropolitana y del resto de Chile por videoconferencia.
+          Complemento mi práctica con un Diplomado en Gobierno Corporativo y
+          Compliance en la Universidad de Chile.
+        </p>
+      </div>
+    </div>
+  </section>
 
-        <h3 style="margin-top: 32px;">Mis credenciales</h3>
-        <ul class="credentials">
-          <li><strong>Universidad:</strong> {site.university}</li>
-          <li><strong>Título:</strong> {site.degree}</li>
-          <li><strong>Habilitación:</strong> Abogada ante la Excma. Corte Suprema, {site.yearAdmitted}</li>
-          <li><strong>Postgrado en curso:</strong> {site.diplomado}</li>
-          <li><strong>Formación complementaria:</strong> Curso de Litigio Estratégico Comunitario, Escuela Latinoamericana de Abogacía Comunitaria y Activismo Jurídico (2025)</li>
-          <li>
-            <strong>Verificación pública:</strong>
-            <a href="https://www.pjud.cl/" target="_blank" rel="noopener noreferrer">
-              Buscador del Poder Judicial
-            </a>
-          </li>
-        </ul>
+  <!-- CÓMO TRABAJO -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Cómo trabajo</span>
+        <h2>Mi forma de acompañarte</h2>
+      </div>
 
-        <h3 style="margin-top: 32px;">Cómo trabajo</h3>
-        <ul class="values">
-          <li>
-            <strong>Cercanía.</strong> Atiendo personalmente cada caso. No te
-            atenderá un asistente —me tendrás a mí en cada audiencia y
-            conversación.
-          </li>
-          <li>
-            <strong>Transparencia.</strong> Honorarios fijos, presupuesto por
-            escrito antes de comenzar y reportes periódicos del avance.
-          </li>
-          <li>
-            <strong>Confidencialidad.</strong> Lo que compartes conmigo está
-            amparado por el secreto profesional.
-          </li>
-          <li>
-            <strong>Realismo.</strong> Te diré las posibilidades reales de tu
-            caso —tanto las buenas como las difíciles— para que tomes
-            decisiones informadas.
-          </li>
-        </ul>
+      <div class="grid grid-4 values">
+        {values.map((v) => (
+          <div class="value-card">
+            <h3>{v.title}</h3>
+            <p>{v.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
 
-        <div style="margin-top: 40px;">
-          <a class="btn btn-gold" href={whatsappLink()} target="_blank" rel="noopener">
-            Conversemos por WhatsApp
-          </a>
-        </div>
+  <!-- FORMACIÓN -->
+  <section class="section section--cream-warm">
+    <div class="container container--narrow">
+      <div class="section-head">
+        <span class="eyebrow">Formación y credenciales</span>
+        <h2>Mi formación</h2>
+      </div>
+
+      <ul class="formacion">
+        <li>
+          <strong>{site.degree}</strong>
+          <span>{site.university}</span>
+        </li>
+        <li>
+          <strong>Abogada habilitada ante la Excma. Corte Suprema</strong>
+          <span>Habilitada para litigar en todo Chile</span>
+        </li>
+        <li>
+          <strong>Diplomado en Gobierno Corporativo y Compliance</strong>
+          <span>Universidad de Chile, Facultad de Derecho · en curso</span>
+        </li>
+        <li>
+          <strong>Litigio Estratégico Comunitario</strong>
+          <span>Escuela Latinoamericana de Abogacía Comunitaria y Activismo Jurídico, 2025</span>
+        </li>
+        <li>
+          <strong>Verificación pública</strong>
+          <span>
+            Puedes verificar mi habilitación en el
+            <a href="https://www.pjud.cl/" target="_blank" rel="noopener noreferrer">Buscador del Poder Judicial</a>.
+          </span>
+        </li>
+      </ul>
+
+      <div class="formacion-cta">
+        <a class="btn btn-gold" href={whatsappLink()} target="_blank" rel="noopener">
+          Conversemos por WhatsApp
+        </a>
       </div>
     </div>
   </section>
@@ -134,7 +143,6 @@ import { site, whatsappLink } from '../data/site';
 
   .photo-placeholder {
     aspect-ratio: 4 / 5;
-    border-radius: var(--radius-lg);
     background: radial-gradient(circle at 30% 20%, var(--navy-soft), var(--navy) 60%);
     display: flex;
     flex-direction: column;
@@ -145,45 +153,79 @@ import { site, whatsappLink } from '../data/site';
     box-shadow: var(--shadow-md);
     position: sticky;
     top: 100px;
+    border: 1px solid var(--gold);
   }
 
-  .photo-mark { font-size: 5rem; font-weight: 600; }
+  .photo-mark { font-size: 5rem; font-weight: 600; line-height: 1; }
   .photo-caption {
     color: var(--cream);
-    opacity: 0.5;
+    opacity: 0.55;
     font-family: var(--sans);
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
+    font-size: 0.74rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    margin-top: 12px;
+    margin-top: 16px;
   }
 
-  .credentials, .values {
+  .about-text h1 { margin-top: 4px; }
+
+  /* Values */
+  .section-head {
+    margin-bottom: 40px;
+    max-width: 640px;
+  }
+
+  .value-card {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 28px;
+  }
+
+  .value-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+
+  .value-card p {
+    color: var(--muted);
+    font-size: 0.94rem;
+    margin: 0;
+  }
+
+  /* Formación */
+  .formacion {
     list-style: none;
     padding: 0;
     margin: 0;
   }
 
-  .credentials li, .values li {
-    padding: 12px 0;
+  .formacion li {
+    padding: 18px 0;
     border-bottom: 1px solid var(--border);
+    display: grid;
+    gap: 4px;
   }
 
-  .credentials li:last-child, .values li:last-child {
-    border-bottom: 0;
-  }
+  .formacion li:last-child { border-bottom: 0; }
 
-  .credentials strong, .values strong {
+  .formacion strong {
     color: var(--navy);
     font-family: var(--serif);
-    font-size: 1.05rem;
+    font-size: 1.15rem;
     font-weight: 600;
-    display: inline-block;
-    margin-right: 8px;
+  }
+
+  .formacion span {
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+
+  .formacion-cta {
+    margin-top: 32px;
   }
 
   @media (max-width: 800px) {
-    .about-grid { grid-template-columns: 1fr; }
+    .about-grid { grid-template-columns: 1fr; gap: 36px; }
     .photo-placeholder { position: static; max-width: 320px; margin-inline: auto; width: 100%; }
   }
 </style>

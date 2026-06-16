@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { whatsappLink, path } from '../../data/site';
 import { services, groupLabels, type ServiceGroup } from '../../data/services';
+import Icon from '../../components/Icon.astro';
 
 const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
 ---
@@ -37,7 +38,7 @@ const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
             {groupServices.map((s) => (
               <a class="service-card" href={path(`/areas-de-practica/${s.slug}`)}>
                 <div class="service-card-head">
-                  <span class="service-icon" aria-hidden="true">{s.icon}</span>
+                  <span class="service-icon" aria-hidden="true"><Icon name={s.icon} size={24} /></span>
                   <h3>{s.title}</h3>
                 </div>
                 <p>{s.summary}</p>
@@ -112,11 +113,11 @@ const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
 
   .service-icon {
     flex-shrink: 0;
-    font-size: 1.6rem;
     width: 48px;
     height: 48px;
     border-radius: 12px;
     background: var(--cream-warm);
+    color: var(--gold);
     display: inline-flex;
     align-items: center;
     justify-content: center;

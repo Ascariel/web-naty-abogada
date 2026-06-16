@@ -5,7 +5,7 @@ export interface Service {
   title: string;
   shortTitle?: string;
   group: ServiceGroup;
-  icon: string; // emoji or short symbol used as a placeholder
+  icon: string; // name of a line-SVG icon in src/components/Icon.astro
   summary: string;
   description: string[];
   priceRange: string;
@@ -28,7 +28,7 @@ export const services: Service[] = [
     title: 'Divorcio de mutuo acuerdo',
     shortTitle: 'Divorcio mutuo acuerdo',
     group: 'pareja',
-    icon: '⚖️',
+    icon: 'scale',
     summary:
       'Ponemos término al matrimonio de manera rápida y sin conflicto, regulando alimentos, cuidado personal y bienes en un solo acuerdo.',
     description: [
@@ -50,7 +50,7 @@ export const services: Service[] = [
     title: 'Divorcio unilateral por cese de convivencia',
     shortTitle: 'Divorcio unilateral',
     group: 'pareja',
-    icon: '⚖️',
+    icon: 'scale',
     summary:
       'Si tu cónyuge no quiere divorciarse, puedo demandar el divorcio unilateralmente acreditando 3 años de cese de convivencia.',
     description: [
@@ -65,7 +65,7 @@ export const services: Service[] = [
     slug: 'divorcio-culposo',
     title: 'Divorcio culposo',
     group: 'pareja',
-    icon: '⚖️',
+    icon: 'scale',
     summary:
       'Cuando hay violencia, abandono o conducta gravemente lesiva del matrimonio, el divorcio culposo se decreta sin esperar plazos.',
     description: [
@@ -79,7 +79,7 @@ export const services: Service[] = [
     slug: 'cese-efectivo-convivencia',
     title: 'Cese efectivo de convivencia',
     group: 'pareja',
-    icon: '📝',
+    icon: 'file-text',
     summary:
       'Notificación formal de cese de convivencia para empezar a contar los plazos del divorcio unilateral.',
     description: [
@@ -95,7 +95,7 @@ export const services: Service[] = [
     slug: 'pension-de-alimentos',
     title: 'Pensión de alimentos',
     group: 'hijos',
-    icon: '👶',
+    icon: 'coins',
     summary:
       'Demanda inicial para fijar la pensión de alimentos a favor de tus hijos, calculada según los ingresos del demandado y las necesidades del niño.',
     description: [
@@ -117,7 +117,7 @@ export const services: Service[] = [
     title: 'Aumento, rebaja o cese de pensión de alimentos',
     shortTitle: 'Modificación de pensión',
     group: 'hijos',
-    icon: '🔄',
+    icon: 'refresh',
     summary:
       'Si las circunstancias cambiaron, la pensión también puede modificarse: aumentarla, rebajarla o ponerle cese.',
     description: [
@@ -132,7 +132,7 @@ export const services: Service[] = [
     title: 'Custodia de niños (cuidado personal)',
     shortTitle: 'Custodia de niños',
     group: 'hijos',
-    icon: '🤝',
+    icon: 'users',
     summary:
       'Solicito o defiendo el cuidado personal de los hijos cuando hay separación, conflicto o cambio de circunstancias.',
     description: [
@@ -148,7 +148,7 @@ export const services: Service[] = [
     title: 'Régimen de visitas (relación directa y regular)',
     shortTitle: 'Régimen de visitas',
     group: 'hijos',
-    icon: '📅',
+    icon: 'calendar',
     summary:
       'Establezco, modifico o hago cumplir el régimen de visitas para asegurar que el padre o madre que no convive con el hijo mantenga el vínculo.',
     description: [
@@ -162,7 +162,7 @@ export const services: Service[] = [
     slug: 'autorizacion-salida-pais',
     title: 'Autorización de salida del país',
     group: 'hijos',
-    icon: '✈️',
+    icon: 'plane',
     summary:
       'Cuando un padre se niega injustificadamente a autorizar la salida del país de un hijo menor de edad, la autorización puede pedirse en tribunales.',
     description: [
@@ -176,7 +176,7 @@ export const services: Service[] = [
     slug: 'reconocimiento-paternidad',
     title: 'Reconocimiento de paternidad',
     group: 'hijos',
-    icon: '🧬',
+    icon: 'user-check',
     summary:
       'Acción de reclamación de filiación para que el padre biológico sea reconocido legalmente, con derechos hereditarios y obligación alimentaria.',
     description: [
@@ -192,7 +192,7 @@ export const services: Service[] = [
     slug: 'violencia-intrafamiliar',
     title: 'Violencia intrafamiliar (VIF)',
     group: 'proteccion',
-    icon: '🛡️',
+    icon: 'shield',
     summary:
       'Asesoría y representación inmediata en casos de violencia intrafamiliar, con medidas cautelares y de protección.',
     description: [
@@ -208,7 +208,7 @@ export const services: Service[] = [
     title: 'Medidas de protección por negligencia parental',
     shortTitle: 'Medidas de protección',
     group: 'proteccion',
-    icon: '🚸',
+    icon: 'shield-alert',
     summary:
       'Solicito medidas de protección ante el Tribunal de Familia cuando un niño, niña o adolescente está siendo vulnerado en sus derechos.',
     description: [
@@ -226,7 +226,7 @@ export const services: Service[] = [
       'Eliminación de topes anuales en prestaciones psicológicas — Isapre',
     shortTitle: 'Recurso contra Isapre · salud mental',
     group: 'otros',
-    icon: '🧠',
+    icon: 'heart-pulse',
     summary:
       'Recurso de protección al amparo de la Ley 21.331 para eliminar los topes anuales que imponen las Isapres a las prestaciones psicológicas y psiquiátricas.',
     description: [
@@ -242,7 +242,7 @@ export const services: Service[] = [
     title: 'Inscripción de marca comercial en INAPI',
     shortTitle: 'Registro de marca · INAPI',
     group: 'otros',
-    icon: '™️',
+    icon: 'badge-check',
     summary:
       'Te ayudo a registrar tu marca, logo o eslogan en el Instituto Nacional de Propiedad Industrial para protegerlo legalmente por 10 años.',
     description: [

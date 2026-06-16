@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { site, whatsappLink } from '../data/site';
+import Icon from '../components/Icon.astro';
 ---
 
 <Base
@@ -23,7 +24,7 @@ import { site, whatsappLink } from '../data/site';
     <div class="container container--narrow">
       <div class="contact-grid">
         <a class="contact-card" href={whatsappLink()} target="_blank" rel="noopener">
-          <span class="contact-icon">💬</span>
+          <span class="contact-icon"><Icon name="message" size={24} /></span>
           <div>
             <h3>WhatsApp</h3>
             <p>Respuesta personalizada en horario hábil</p>
@@ -32,7 +33,7 @@ import { site, whatsappLink } from '../data/site';
         </a>
 
         <a class="contact-card" href={`mailto:${site.email}`}>
-          <span class="contact-icon">✉️</span>
+          <span class="contact-icon"><Icon name="mail" size={24} /></span>
           <div>
             <h3>Correo electrónico</h3>
             <p>{site.email}</p>
@@ -41,7 +42,7 @@ import { site, whatsappLink } from '../data/site';
         </a>
 
         <div class="contact-card">
-          <span class="contact-icon">📍</span>
+          <span class="contact-icon"><Icon name="map-pin" size={24} /></span>
           <div>
             <h3>Oficina</h3>
             <p>{site.officeAddress}</p>
@@ -50,7 +51,7 @@ import { site, whatsappLink } from '../data/site';
         </div>
 
         <div class="contact-card">
-          <span class="contact-icon">🕒</span>
+          <span class="contact-icon"><Icon name="clock" size={24} /></span>
           <div>
             <h3>Horario</h3>
             <p>Lunes a viernes, 9:00 – 19:00 hrs</p>
@@ -72,7 +73,7 @@ import { site, whatsappLink } from '../data/site';
       </ul>
 
       <p>
-        Valor referencial de la consulta: <strong>$40.000</strong>. En casos
+        Valor referencial de la consulta: <strong>$15.000</strong>. En casos
         de violencia intrafamiliar la primera orientación es siempre
         gratuita.
       </p>
@@ -126,11 +127,11 @@ import { site, whatsappLink } from '../data/site';
   }
 
   .contact-icon {
-    font-size: 1.6rem;
     width: 48px;
     height: 48px;
     border-radius: 12px;
     background: var(--cream-warm);
+    color: var(--gold);
     display: inline-flex;
     align-items: center;
     justify-content: center;

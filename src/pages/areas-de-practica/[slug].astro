@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { whatsappLink, path } from '../../data/site';
 import { services, groupLabels } from '../../data/services';
+import Icon from '../../components/Icon.astro';
 
 export function getStaticPaths() {
   return services.map((s) => ({
@@ -30,7 +31,7 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
       </p>
 
       <div class="title-row">
-        <span class="service-icon" aria-hidden="true">{service.icon}</span>
+        <span class="service-icon" aria-hidden="true"><Icon name={service.icon} size={34} /></span>
         <div>
           <span class="eyebrow">{groupLabels[service.group]}</span>
           <h1>{service.title}</h1>
@@ -87,7 +88,7 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
         <div class="grid grid-3">
           {related.map((s) => (
             <a class="service-card" href={path(`/areas-de-practica/${s.slug}`)}>
-              <span class="service-icon" aria-hidden="true">{s.icon}</span>
+              <span class="service-icon" aria-hidden="true"><Icon name={s.icon} size={24} /></span>
               <h3>{s.shortTitle ?? s.title}</h3>
               <p>{s.summary}</p>
               <span class="service-price">{s.priceRange}</span>
@@ -123,11 +124,11 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
 
   .title-row .service-icon {
     flex-shrink: 0;
-    font-size: 2rem;
     width: 72px;
     height: 72px;
     border-radius: 16px;
     background: var(--cream-warm);
+    color: var(--gold);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -248,8 +249,11 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
   .service-card .service-icon {
     width: 44px;
     height: 44px;
-    font-size: 1.4rem;
+    color: var(--gold);
     margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .service-card h3 {

@@ -11,7 +11,7 @@ export const site = {
   // TODO: replace with real address
   officeAddress: 'Atención en Santiago · Chile',
   instagram: '',
-  linkedin: 'https://www.linkedin.com/in/natalia-vallejosgutierrez/',
+  linkedin: 'https://www.linkedin.com/in/natalia-vallejos-gutierrez/',
   university: 'Universidad Alberto Hurtado',
   degree: 'Licenciada en Ciencias Jurídicas y Sociales',
   yearAdmitted: 2026,
