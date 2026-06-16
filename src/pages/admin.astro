@@ -1,8 +1,7 @@
 ---
 // Internal analytics dashboard. Access is gated by functions/_middleware.ts
-// (HTTP Basic Auth: admin / ADMIN_PASSWORD). Standalone — it deliberately does
-// not use Base.astro. Data comes from /api/stats, which the browser calls with
-// the same Basic Auth credentials. Shows, for every event type, both total
+// (HTTP Basic Auth: admin / ADMIN_PASSWORD). Standalone — does not use Base.astro.
+// Data comes from /api/stats. Shows, for every event type, both total
 // (non-unique) and unique (by IP per day) counts over time.
 ---
 
@@ -12,119 +11,205 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="light" />
     <title>Estadísticas — Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
   </head>
   <body>
-    <main class="wrap">
-      <header class="head">
-        <h1>Estadísticas de eventos</h1>
-        <p class="sub">tranquilidadlegal.cl · eventos registrados (bots excluidos)</p>
+    <div class="page">
+      <header class="page-head">
+        <div class="title-line">
+          <h1>Estadísticas</h1>
+          <span class="badge"><span class="badge-dot"></span>tranquilidadlegal.cl</span>
+        </div>
+        <p class="sub">Eventos registrados en el sitio · bots excluidos</p>
       </header>
 
-      <form id="filters" class="filters">
-        <label>Desde<input type="date" id="from" name="from" /></label>
-        <label>Hasta<input type="date" id="to" name="to" /></label>
-        <label>
-          Agrupar por
-          <select id="granularity" name="granularity">
-            <option value="day">Día</option>
-            <option value="week">Semana</option>
-            <option value="month">Mes</option>
-          </select>
-        </label>
-        <button type="submit">Aplicar</button>
-      </form>
+      <div class="toolbar">
+        <div class="field">
+          <label for="from">Desde</label>
+          <input type="date" id="from" />
+        </div>
+        <div class="field">
+          <label for="to">Hasta</label>
+          <input type="date" id="to" />
+        </div>
+        <div class="field">
+          <label>Agrupar</label>
+          <div class="seg" id="seg" role="group" aria-label="Agrupar por">
+            <button type="button" data-g="day" class="is-active">Día</button>
+            <button type="button" data-g="week">Semana</button>
+            <button type="button" data-g="month">Mes</button>
+          </div>
+        </div>
+        <button type="button" class="btn-apply" id="apply">Aplicar</button>
+        <span class="status" id="status" aria-live="polite"></span>
+      </div>
 
-      <section class="summary">
-        <table id="summary-table">
-          <thead>
-            <tr><th>Evento</th><th>Total</th><th>Únicas (IP·día)</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
+      <section class="kpis" id="kpis"></section>
 
-      <section class="chart-box">
-        <h2>Eventos totales</h2>
-        <p class="hint">Cuenta cada acción, incluso repetida por la misma persona.</p>
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>Eventos totales</h2>
+            <p>Cada acción, incluso repetida por la misma persona.</p>
+          </div>
+        </div>
         <div class="canvas-holder"><canvas id="chart-total"></canvas></div>
         <p class="empty" id="empty-total" hidden>Sin datos en este rango.</p>
       </section>
 
-      <section class="chart-box">
-        <h2>Eventos únicos</h2>
-        <p class="hint">Una sola vez por IP por día, para cada tipo de evento.</p>
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <h2>Eventos únicos</h2>
+            <p>Una sola vez por IP por día, para cada tipo de evento.</p>
+          </div>
+        </div>
         <div class="canvas-holder"><canvas id="chart-unique"></canvas></div>
         <p class="empty" id="empty-unique" hidden>Sin datos en este rango.</p>
       </section>
-
-      <p class="status" id="status"></p>
-    </main>
+    </div>
 
     <script is:inline>
       (function () {
         const $ = (id) => document.getElementById(id);
-        const fmtNum = (n) => new Intl.NumberFormat('es-CL').format(n);
+        const fmt = (n) => new Intl.NumberFormat('es-CL').format(n);
         const isoLocal = (d) => {
           const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
           return z.toISOString().slice(0, 10);
         };
 
-        // Friendly labels + colors per known event type.
         const EVENT_META = {
-          page_view: { label: 'Vistas de página', color: '#0e2a47' },
-          whatsapp_btn_click: { label: 'Clics WhatsApp', color: '#25d366' },
-          contact_info_click: { label: 'Clics datos de contacto', color: '#c9a864' },
+          page_view: { label: 'Vistas de página', color: '#2563eb' },
+          whatsapp_btn_click: { label: 'Clics WhatsApp', color: '#16a34a' },
+          contact_info_click: { label: 'Clics datos de contacto', color: '#d4a13c' },
         };
-        const FALLBACK = ['#8a6d3b', '#5b7c99', '#a0522d', '#556b2f', '#6a5acd', '#b8553a'];
-        const meta = (type, i) =>
-          EVENT_META[type] || { label: type, color: FALLBACK[i % FALLBACK.length] };
+        const FALLBACK = ['#7c3aed', '#0891b2', '#dc2626', '#4f46e5', '#db2777', '#65a30d'];
+        const meta = (t, i) => EVENT_META[t] || { label: t, color: FALLBACK[i % FALLBACK.length] };
 
-        // Default range: last 30 days.
+        let granularity = 'day';
+        let totalChart = null;
+        let uniqueChart = null;
+
+        // Defaults: last 30 days.
         const today = new Date();
         const past = new Date(today.getTime() - 29 * 86400000);
         $('from').value = isoLocal(past);
         $('to').value = isoLocal(today);
 
-        let totalChart = null;
-        let uniqueChart = null;
+        function setChartDefaults() {
+          if (!window.Chart) return;
+          Chart.defaults.font.family =
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+          Chart.defaults.font.size = 12;
+          Chart.defaults.color = '#6b7280';
+        }
 
         async function load() {
           const from = $('from').value;
           const to = $('to').value;
-          const granularity = $('granularity').value;
           $('status').textContent = 'Cargando…';
           let data;
           try {
-            const res = await fetch(
-              `/api/stats?from=${from}&to=${to}&granularity=${granularity}`,
-              { headers: { Accept: 'application/json' } }
-            );
+            const res = await fetch(`/api/stats?from=${from}&to=${to}&granularity=${granularity}`, {
+              headers: { Accept: 'application/json' },
+            });
             if (!res.ok) throw new Error('HTTP ' + res.status);
             data = await res.json();
           } catch (err) {
-            $('status').textContent = 'Error al cargar datos: ' + err.message;
+            $('status').textContent = 'Error: ' + err.message;
             return;
           }
           $('status').textContent = '';
           render(data);
         }
 
-        function buildDatasets(data, kind) {
+        function renderKpis(data) {
+          const wrap = $('kpis');
+          if (!data.eventTypes.length) {
+            wrap.innerHTML = '<div class="kpi kpi-empty">Sin eventos en este rango.</div>';
+            return;
+          }
+          wrap.innerHTML = data.eventTypes
+            .map((t, i) => {
+              const m = meta(t, i);
+              const tot = data.totals[t] || { total: 0, unique: 0 };
+              return `<div class="kpi" style="--c:${m.color}">
+                <div class="kpi-top"><span class="kpi-dot"></span><span class="kpi-label">${m.label}</span></div>
+                <div class="kpi-num">${fmt(tot.total)}</div>
+                <div class="kpi-meta"><strong>${fmt(tot.unique)}</strong> únicas (IP·día)</div>
+              </div>`;
+            })
+            .join('');
+        }
+
+        function gradient(ctx, color) {
+          const { ctx: c, chartArea } = ctx.chart;
+          if (!chartArea) return color + '22';
+          const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          g.addColorStop(0, color + '40');
+          g.addColorStop(1, color + '00');
+          return g;
+        }
+
+        function datasets(data, kind) {
+          const showPoints = data.periods.length <= 2;
           return data.eventTypes.map((t, i) => {
             const m = meta(t, i);
             return {
               label: m.label,
               data: (data.series[t] && data.series[t][kind]) || [],
               borderColor: m.color,
-              backgroundColor: m.color + '22',
-              tension: 0.25,
-              fill: false,
-              pointRadius: 2,
-              borderWidth: 2,
+              backgroundColor: (c) => gradient(c, m.color),
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointRadius: showPoints ? 4 : 0,
+              pointHoverRadius: 5,
+              pointBackgroundColor: m.color,
+              pointBorderColor: '#fff',
+              pointBorderWidth: 1.5,
             };
           });
+        }
+
+        function options() {
+          return {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: {
+                position: 'top',
+                align: 'end',
+                labels: { usePointStyle: true, pointStyle: 'circle', boxHeight: 7, padding: 18, color: '#374151' },
+              },
+              tooltip: {
+                backgroundColor: '#0f172a',
+                padding: 12,
+                cornerRadius: 10,
+                titleColor: '#fff',
+                bodyColor: '#e2e8f0',
+                usePointStyle: true,
+                boxPadding: 6,
+                titleFont: { weight: '600' },
+              },
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8, color: '#9ca3af' },
+              },
+              y: {
+                beginAtZero: true,
+                border: { display: false },
+                grid: { color: '#eef1f5', drawTicks: false },
+                ticks: { precision: 0, color: '#9ca3af', padding: 10 },
+              },
+            },
+          };
         }
 
         function drawChart(existing, canvasId, emptyId, data, kind) {
@@ -133,131 +218,192 @@
           $(emptyId).hidden = hasData;
           canvas.style.display = hasData ? '' : 'none';
           if (!hasData) {
-            if (existing) { existing.destroy(); }
+            if (existing) existing.destroy();
             return null;
           }
-          const cfg = {
-            type: 'line',
-            data: { labels: data.periods, datasets: buildDatasets(data, kind) },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              interaction: { mode: 'index', intersect: false },
-              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-              plugins: { legend: { position: 'top' } },
-            },
-          };
           if (existing) {
-            existing.data = cfg.data;
+            existing.data = { labels: data.periods, datasets: datasets(data, kind) };
             existing.update();
             return existing;
           }
-          return new Chart(canvas.getContext('2d'), cfg);
+          return new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: { labels: data.periods, datasets: datasets(data, kind) },
+            options: options(),
+          });
         }
 
         function render(data) {
-          // Summary table
-          const tbody = document.querySelector('#summary-table tbody');
-          if (!data.eventTypes.length) {
-            tbody.innerHTML =
-              '<tr><td colspan="3" class="muted">Sin eventos en este rango.</td></tr>';
-          } else {
-            tbody.innerHTML = data.eventTypes
-              .map((t, i) => {
-                const m = meta(t, i);
-                const tot = data.totals[t] || { total: 0, unique: 0 };
-                return `<tr>
-                  <td><span class="dot" style="background:${m.color}"></span>${m.label}</td>
-                  <td>${fmtNum(tot.total)}</td>
-                  <td>${fmtNum(tot.unique)}</td>
-                </tr>`;
-              })
-              .join('');
-          }
-
+          renderKpis(data);
           totalChart = drawChart(totalChart, 'chart-total', 'empty-total', data, 'total');
           uniqueChart = drawChart(uniqueChart, 'chart-unique', 'empty-unique', data, 'unique');
         }
 
-        $('filters').addEventListener('submit', (e) => {
-          e.preventDefault();
+        // Segmented control
+        $('seg').addEventListener('click', (e) => {
+          const b = e.target.closest('button');
+          if (!b) return;
+          granularity = b.dataset.g;
+          [...$('seg').children].forEach((c) => c.classList.toggle('is-active', c === b));
           load();
         });
+        $('apply').addEventListener('click', load);
+        ['from', 'to'].forEach((id) => $(id).addEventListener('change', load));
 
         function start() {
-          if (window.Chart) load();
-          else setTimeout(start, 50);
+          if (window.Chart) {
+            setChartDefaults();
+            load();
+          } else {
+            setTimeout(start, 50);
+          }
         }
         start();
       })();
     </script>
 
-    <style>
+    <style is:global>
       :root {
+        --bg: #f4f6f9;
+        --card: #ffffff;
+        --ink: #0f172a;
+        --muted: #6b7280;
+        --faint: #9ca3af;
+        --line: #e6e9ee;
         --navy: #0e2a47;
-        --gold: #c9a864;
-        --cream: #fbf7eb;
-        --border: #e2dcc9;
-        --muted: #6b6b6b;
+        --accent: #2563eb;
+        --radius: 16px;
+        --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.05);
+        --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
       }
       * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
       body {
         margin: 0;
-        background: var(--cream);
-        color: #1a1a1a;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
       }
-      .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
-      .head h1 { margin: 0 0 4px; color: var(--navy); font-size: 1.7rem; }
-      .sub { margin: 0 0 24px; color: var(--muted); font-size: 0.9rem; }
+      .page { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
 
-      .filters {
-        display: flex; flex-wrap: wrap; align-items: end; gap: 16px;
-        background: #fff; border: 1px solid var(--border);
-        padding: 18px; border-radius: 8px; margin-bottom: 24px;
+      /* Header */
+      .page-head { margin-bottom: 28px; }
+      .title-line { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+      .page-head h1 {
+        margin: 0; font-size: 1.9rem; font-weight: 700;
+        letter-spacing: -0.02em; color: var(--navy);
       }
-      .filters label {
-        display: flex; flex-direction: column; gap: 4px;
+      .badge {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: #fff; border: 1px solid var(--line);
+        padding: 5px 11px; border-radius: 999px;
+        font-size: 0.78rem; font-weight: 600; color: var(--muted);
+        box-shadow: var(--shadow-sm);
+      }
+      .badge-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #16a34a; box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+      }
+      .sub { margin: 8px 0 0; color: var(--muted); font-size: 0.92rem; }
+
+      /* Toolbar */
+      .toolbar {
+        display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px;
+        background: var(--card); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 16px 18px;
+        box-shadow: var(--shadow); margin-bottom: 24px;
+      }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field > label {
+        font-size: 0.7rem; font-weight: 600; color: var(--faint);
+        text-transform: uppercase; letter-spacing: 0.06em;
+      }
+      .field input[type='date'] {
+        font: inherit; font-size: 0.9rem; padding: 9px 12px;
+        border: 1px solid var(--line); border-radius: 10px;
+        background: #fff; color: var(--ink); min-height: 40px;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      .field input[type='date']:focus {
+        outline: none; border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      }
+      .seg {
+        display: inline-flex; background: #eef1f5; border-radius: 10px;
+        padding: 3px; gap: 2px;
+      }
+      .seg button {
+        font: inherit; font-size: 0.85rem; font-weight: 600;
+        border: 0; background: transparent; color: var(--muted);
+        padding: 7px 16px; border-radius: 8px; cursor: pointer;
+        transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+      }
+      .seg button:hover { color: var(--ink); }
+      .seg button.is-active {
+        background: #fff; color: var(--navy);
+        box-shadow: var(--shadow-sm);
+      }
+      .btn-apply {
+        font: inherit; font-size: 0.9rem; font-weight: 600;
+        padding: 10px 20px; min-height: 40px; border: 0; border-radius: 10px;
+        background: var(--navy); color: #fff; cursor: pointer;
+        transition: background 0.15s, transform 0.05s;
+      }
+      .btn-apply:hover { background: #163a5f; }
+      .btn-apply:active { transform: translateY(1px); }
+      .status { color: var(--faint); font-size: 0.85rem; align-self: center; min-width: 60px; }
+
+      /* KPI cards */
+      .kpis {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 16px; margin-bottom: 24px;
+      }
+      .kpi {
+        position: relative; overflow: hidden;
+        background: var(--card); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 20px 22px;
+        box-shadow: var(--shadow);
+      }
+      .kpi::before {
+        content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+        width: 4px; background: var(--c, var(--accent));
+      }
+      .kpi-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+      .kpi-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c, var(--accent)); }
+      .kpi-label {
         font-size: 0.78rem; font-weight: 600; color: var(--muted);
         text-transform: uppercase; letter-spacing: 0.04em;
       }
-      .filters input, .filters select {
-        font: inherit; padding: 9px 10px; border: 1px solid var(--border);
-        border-radius: 6px; background: #fff; color: #1a1a1a;
+      .kpi-num {
+        font-size: 2.2rem; font-weight: 700; color: var(--navy);
+        line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
       }
-      .filters button {
-        font: inherit; font-weight: 600; padding: 10px 22px; border: 0;
-        border-radius: 6px; background: var(--navy); color: var(--cream); cursor: pointer;
-      }
-      .filters button:hover { background: #14375c; }
+      .kpi-meta { margin-top: 8px; font-size: 0.85rem; color: var(--muted); }
+      .kpi-meta strong { color: var(--ink); font-weight: 700; }
+      .kpi-empty { color: var(--muted); grid-column: 1 / -1; }
 
-      .summary {
-        background: #fff; border: 1px solid var(--border);
-        border-radius: 8px; overflow: hidden; margin-bottom: 24px;
+      /* Chart cards */
+      .card {
+        background: var(--card); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 22px 24px 24px;
+        box-shadow: var(--shadow); margin-bottom: 20px;
       }
-      table { width: 100%; border-collapse: collapse; font-size: 0.94rem; }
-      th, td { padding: 11px 16px; text-align: left; border-bottom: 1px solid var(--border); }
-      th { background: #faf7ee; color: var(--navy); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; }
-      tbody tr:last-child td { border-bottom: 0; }
-      td:nth-child(2), td:nth-child(3), th:nth-child(2), th:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; }
-      .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: baseline; }
-      .muted { color: var(--muted); text-align: center; }
-
-      .chart-box {
-        background: #fff; border: 1px solid var(--border);
-        border-radius: 8px; padding: 20px; margin-bottom: 24px;
-      }
-      .chart-box h2 { margin: 0 0 2px; color: var(--navy); font-size: 1.1rem; }
-      .hint { margin: 0 0 14px; color: var(--muted); font-size: 0.84rem; }
-      .canvas-holder { position: relative; height: 300px; }
-      .empty { text-align: center; color: var(--muted); padding: 40px 0; }
-
-      .status { color: var(--muted); font-size: 0.88rem; margin-top: 8px; min-height: 1.2em; }
+      .card-head { margin-bottom: 8px; }
+      .card-head h2 { margin: 0; font-size: 1.12rem; font-weight: 650; color: var(--navy); letter-spacing: -0.01em; }
+      .card-head p { margin: 3px 0 0; color: var(--muted); font-size: 0.85rem; }
+      .canvas-holder { position: relative; height: 320px; margin-top: 14px; }
+      .empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 0.92rem; }
 
       @media (max-width: 640px) {
-        .canvas-holder { height: 240px; }
+        .page { padding: 28px 16px 60px; }
+        .toolbar { gap: 12px; }
+        .field, .field input[type='date'] { width: 100%; }
+        .canvas-holder { height: 260px; }
       }
     </style>
+    <!-- global: KPI cards are injected by JS and wouldn't match Astro's scoped
+         selectors; standalone page, so nothing else is affected. -->
   </body>
 </html>
