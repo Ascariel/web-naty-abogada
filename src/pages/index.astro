@@ -393,15 +393,17 @@ const faqs = [
     /* Hide just the direct-child spacers, not the <br> inside pill labels. */
     .hero-inner > br { display: none; }
 
+    /* Even 2-column grid: left-aligned labels, icons top-aligned per row. */
     .hero-areas {
       display: grid;
-      grid-template-columns: repeat(2, auto);
-      justify-content: center;
-      gap: 16px 26px;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 14px;
       margin-top: 20px;
+      text-align: left;
     }
 
-    .hero-areas li { justify-content: flex-start; }
+    .hero-areas li { align-items: flex-start; gap: 8px; }
+    .hero-areas svg { width: 22px; height: 22px; margin-top: 1px; }
   }
 
   /* Reassurance bar (4-up) */
