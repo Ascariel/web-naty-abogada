@@ -3,6 +3,16 @@ import { navItems, site, whatsappLink, path } from '../data/site';
 
 const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 const currentPath = (Astro.url.pathname.replace(/\/$/, '') || '/').replace(base, '') || '/';
+
+const stripSlash = (p: string) => p.replace(/\/$/, '') || '/';
+const cur = stripSlash(currentPath);
+
+function isActive(href: string): boolean {
+  const target = stripSlash(href);
+  // Home is active only on the exact root; sections also match their subpages.
+  if (target === '/') return cur === '/';
+  return cur === target || cur.startsWith(target + '/');
+}
 ---
 
 <header class="site-header">
@@ -21,7 +31,7 @@ const currentPath = (Astro.url.pathname.replace(/\/$/, '') || '/').replace(base,
           <li>
             <a
               href={path(item.href)}
-              class={currentPath === item.href.replace(/\/$/, '') || (item.href !== '/' && currentPath.startsWith(item.href)) ? 'active' : ''}
+              class={isActive(item.href) ? 'active' : ''}
             >
               {item.label}
             </a>
