@@ -9,13 +9,13 @@ const firstGroup = groups.find((g) => services.some((s) => s.group === g));
 ---
 
 <Base
-  title="Áreas de práctica"
-  description="Áreas de práctica: divorcios, pensión de alimentos, custodia, visitas, autorización de salida del país, violencia intrafamiliar, recursos contra Isapres y registro de marcas en INAPI."
+  title="Servicios y honorarios"
+  description="Servicios y honorarios: divorcios, pensión de alimentos, custodia, visitas, autorización de salida del país, violencia intrafamiliar, recursos contra Isapres y registro de marcas en INAPI."
 >
   <section class="section section--intro">
     <div class="container container--narrow">
-      <span class="eyebrow">Áreas de práctica</span>
-      <h1>Servicios y honorarios</h1>
+      <span class="eyebrow">Servicios</span>
+      <h1>Servicios y Honorarios</h1>
       <p class="lead">
         Estos son los servicios que ofrezco, con rangos referenciales de
         honorarios. Cada caso se evalúa de forma personalizada y recibe una
@@ -37,7 +37,7 @@ const firstGroup = groups.find((g) => services.some((s) => s.group === g));
 
           <div class="grid grid-2 services">
             {groupServices.map((s) => (
-              <a class="service-card" href={path(`/areas-de-practica/${s.slug}`)}>
+              <a class="service-card" href={path(`/servicios/${s.slug}`)}>
                 <div class="service-card-head">
                   <span class="service-icon" aria-hidden="true"><Icon name={s.icon} size={24} /></span>
                   <h3>{s.title}</h3>

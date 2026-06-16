@@ -171,7 +171,7 @@ const faqs = [
   <section class="section">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow">Áreas de práctica</span>
+        <span class="eyebrow">Servicios</span>
         <h2>Cómo puedo ayudarte</h2>
         <p class="lead">
           Mis servicios cubren las principales materias del Derecho de
@@ -182,7 +182,7 @@ const faqs = [
 
       <div class="grid grid-3 services">
         {featured.map((s) => (
-          <a class="service-card" href={path(`/areas-de-practica/${s.slug}`)}>
+          <a class="service-card" href={path(`/servicios/${s.slug}`)}>
             <span class="service-icon" aria-hidden="true"><Icon name={s.icon} size={26} /></span>
             <h3>{s.shortTitle ?? s.title}</h3>
             <p>{s.summary}</p>
@@ -193,7 +193,7 @@ const faqs = [
       </div>
 
       <div class="text-center" style="margin-top: 40px;">
-        <a class="btn btn-outline" href={path('/areas-de-practica')}>Ver todas las áreas</a>
+        <a class="btn btn-outline" href={path('/servicios')}>Ver todos los servicios</a>
       </div>
     </div>
   </section>

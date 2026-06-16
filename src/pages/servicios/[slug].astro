@@ -27,7 +27,7 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
   <section class="section">
     <div class="container container--narrow">
       <p class="breadcrumb">
-        <a href={path('/areas-de-practica')}>Áreas de práctica</a> / <span>{groupLabels[service.group]}</span>
+        <a href={path('/servicios')}>Servicios</a> / <span>{groupLabels[service.group]}</span>
       </p>
 
       <div class="title-row">
@@ -87,7 +87,7 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
 
         <div class="grid grid-3">
           {related.map((s) => (
-            <a class="service-card" href={path(`/areas-de-practica/${s.slug}`)}>
+            <a class="service-card" href={path(`/servicios/${s.slug}`)}>
               <span class="service-icon" aria-hidden="true"><Icon name={s.icon} size={24} /></span>
               <h3>{s.shortTitle ?? s.title}</h3>
               <p>{s.summary}</p>

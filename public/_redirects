@@ -1,0 +1,3 @@
+# Old /areas-de-practica path renamed to /servicios (Cloudflare Pages).
+/areas-de-practica /servicios 301
+/areas-de-practica/* /servicios/:splat 301

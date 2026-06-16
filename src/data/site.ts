@@ -22,7 +22,7 @@ export const site = {
 export const navItems = [
   { href: '/', label: 'Inicio' },
   { href: '/sobre-mi', label: 'Sobre mí' },
-  { href: '/areas-de-practica', label: 'Áreas de práctica' },
+  { href: '/servicios', label: 'Servicios y honorarios' },
   { href: '/contacto', label: 'Contacto' },
 ];
 
