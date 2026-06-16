@@ -11,7 +11,8 @@
  *   periods: string[],                    // sorted period labels in range
  *   eventTypes: string[],                 // event types seen, page_view first
  *   series: { [type]: { total: number[], unique: number[] } },  // aligned to periods
- *   totals: { [type]: { total: number, unique: number } }
+ *   totals: { [type]: { total: number, unique: number } },
+ *   pages: { path: string, uniques: number }[]   // page_view unique visits per path
  * }
  */
 
@@ -33,6 +34,20 @@ function isoDay(d: Date): string {
 
 function clampDate(value: string | null, fallback: string): string {
   return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : fallback;
+}
+
+// Reduce a stored current_url (full URL or path) to a clean pathname, dropping
+// the origin, query string and hash, and the trailing slash.
+function normalizePath(url: unknown): string {
+  if (typeof url !== 'string' || !url) return '/';
+  let p: string;
+  try {
+    p = new URL(url).pathname;
+  } catch {
+    p = url.split('?')[0].split('#')[0];
+  }
+  if (p.length > 1) p = p.replace(/\/+$/, '');
+  return p || '/';
 }
 
 interface Row {
@@ -108,8 +123,36 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     totals[r.event_type].unique += r.uniques;
   }
 
+  // Per-page unique visits (page_view only) for the pie chart. We pull the raw
+  // page_view rows and count distinct (path, ip, day) per normalized path —
+  // URL normalization is easier here than in SQL. Volume is tiny for this site.
+  let pages: Array<{ path: string; uniques: number }> = [];
+  try {
+    const pv = await env.DB.prepare(
+      "SELECT current_url, ip, day FROM events WHERE event_type = 'page_view' AND day BETWEEN ?1 AND ?2"
+    )
+      .bind(from, to)
+      .all();
+    const rows = (pv.results ?? []) as Array<{ current_url: string; ip: string; day: string }>;
+    const seen = new Set<string>();
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      const path = normalizePath(r.current_url);
+      if (path === '/admin' || path.startsWith('/admin/')) continue;
+      const key = `${path}|${r.ip}|${r.day}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      counts.set(path, (counts.get(path) ?? 0) + 1);
+    }
+    pages = [...counts.entries()]
+      .map(([path, uniques]) => ({ path, uniques }))
+      .sort((a, b) => b.uniques - a.uniques);
+  } catch {
+    pages = [];
+  }
+
   return Response.json(
-    { granularity, from, to, periods, eventTypes, series, totals },
+    { granularity, from, to, periods, eventTypes, series, totals, pages },
     { headers: { 'Cache-Control': 'no-store' } }
   );
 };
