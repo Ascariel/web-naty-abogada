@@ -4,13 +4,12 @@
  * Public (no auth). Called fire-and-forget by beacons in Base.astro.
  * Body: { type?: string, path?: string }. `type` defaults to "page_view".
  *
- * Privacy: we never store the raw IP — only SHA-256(IP_SALT | ip | day), which
- * still lets us count one unique actor per IP per day for each event type.
+ * Stores the raw client IP (for abuse/bot forensics). Unique counts are derived
+ * downstream as one per IP per day.
  */
 
 interface Env {
   DB: D1Database;
-  IP_SALT?: string;
 }
 
 // JS-capable crawlers / link unfurlers we don't want to count. (Non-JS bots
@@ -28,14 +27,6 @@ function santiagoDay(now: Date): string {
     month: '2-digit',
     day: '2-digit',
   }).format(now);
-}
-
-async function sha256Hex(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input);
-  const digest = await crypto.subtle.digest('SHA-256', data);
-  return [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
 }
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
@@ -66,14 +57,12 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     '0.0.0.0';
 
   const day = santiagoDay(new Date());
-  const salt = env.IP_SALT ?? 'no-salt';
-  const ipHash = await sha256Hex(`${salt}|${ip}|${day}`);
 
   try {
     await env.DB.prepare(
-      'INSERT INTO events (day, event_type, ip_hash, path, created_at) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO events (day, event_type, ip, path, created_at) VALUES (?, ?, ?, ?, ?)'
     )
-      .bind(day, eventType, ipHash, path, Date.now())
+      .bind(day, eventType, ip, path, Date.now())
       .run();
   } catch {
     return new Response(null, { status: 204 });

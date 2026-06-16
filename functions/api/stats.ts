@@ -61,7 +61,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     SELECT ${period} AS period,
            event_type,
            COUNT(*) AS total,
-           COUNT(DISTINCT ip_hash) AS uniques
+           COUNT(DISTINCT ip || '|' || day) AS uniques
     FROM events
     WHERE day BETWEEN ?1 AND ?2
     GROUP BY period, event_type

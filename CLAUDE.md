@@ -86,8 +86,8 @@ automatically.
   `wa.me`/WhatsApp links and `contact_info_click` for `mailto:`/`tel:` links, site-wide.
   Skips localhost, `*.github.io`, and `/admin*`.
 - `functions/api/track.ts` records the event in **D1**. `event_type` is validated against
-  `^[a-z][a-z0-9_]{0,39}$`. Bots excluded by User-Agent. Privacy: stores
-  `SHA-256(IP_SALT | ip | day)`, **never the raw IP** — still gives one unique per IP per day.
+  `^[a-z][a-z0-9_]{0,39}$`. Bots excluded by User-Agent. Stores the **raw client IP**
+  (`CF-Connecting-IP`) for abuse/bot forensics; uniques are `COUNT(DISTINCT ip || day)`.
 - `functions/api/stats.ts` returns, per event type, total + unique series aggregated by
   `day | week | month`, filterable by date.
 - `functions/_middleware.ts` gates `/admin` and `/api/stats` with HTTP Basic Auth
@@ -104,12 +104,12 @@ bindings), so the dashboard is the single source of truth:
 2. Project → **Settings → Functions → D1 database bindings** → add binding **`DB`** → `naty-analytics`
    (Production, and Preview if you want).
 3. Project → **Settings → Environment variables** → add (type *Secret*):
-   `ADMIN_PASSWORD` = `passpass` (change anytime) and `IP_SALT` = a long random string. Set for Production.
+   `ADMIN_PASSWORD` = `passpass` (change anytime). Set for Production.
 4. **Redeploy** (push, or "Retry deployment") so the new bindings take effect. Then visit the site
    and open `https://tranquilidadlegal.cl/admin` (login `admin` / `passpass`).
 
 **Local dev** (optional): create a local `wrangler.toml` (gitignored) with a `[[d1_databases]]`
-binding `DB`→`naty-analytics`, put `ADMIN_PASSWORD`/`IP_SALT` in `.dev.vars`, then
+binding `DB`→`naty-analytics`, put `ADMIN_PASSWORD` in `.dev.vars`, then
 `wrangler d1 execute naty-analytics --local --file=migrations/0001_init.sql` and
 `npm run build && npx wrangler pages dev dist`.
 
