@@ -260,18 +260,21 @@
             );
           });
 
-          // Pie: unique page_view visits by page.
+          // Pie: page_view visits by page — follows the metric toggle.
           const pages = data.pages || [];
-          if (pages.length) {
-            const labels = pages.map((p) => pageLabel(p.path));
-            const values = pages.map((p) => p.uniques);
-            const colors = pages.map((_, i) => PIE_COLORS[i % PIE_COLORS.length]);
+          const valueKey = metric === 'unique' ? 'uniques' : 'total';
+          const pageData = pages.filter((p) => p[valueKey] > 0);
+          if (pageData.length) {
+            const labels = pageData.map((p) => pageLabel(p.path));
+            const values = pageData.map((p) => p[valueKey]);
+            const colors = pageData.map((_, i) => PIE_COLORS[i % PIE_COLORS.length]);
+            const pieMeta = metric === 'unique' ? 'Visitas únicas por página' : 'Visitas totales por página';
             const card = document.createElement('section');
             card.className = 'card chart-card';
             card.innerHTML = `
               <div class="card-head">
                 <div class="ch-title"><h2>Páginas visitadas</h2></div>
-                <div class="ch-meta">Visitas únicas por página</div>
+                <div class="ch-meta">${pieMeta}</div>
               </div>
               <div class="canvas-holder"><canvas></canvas></div>`;
             wrap.appendChild(card);

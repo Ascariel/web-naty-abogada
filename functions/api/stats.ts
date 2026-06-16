@@ -12,7 +12,7 @@
  *   eventTypes: string[],                 // event types seen, page_view first
  *   series: { [type]: { total: number[], unique: number[] } },  // aligned to periods
  *   totals: { [type]: { total: number, unique: number } },
- *   pages: { path: string, uniques: number }[]   // page_view unique visits per path
+ *   pages: { path: string, uniques: number, total: number }[]   // page_view visits per path
  * }
  */
 
@@ -126,7 +126,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   // Per-page unique visits (page_view only) for the pie chart. We pull the raw
   // page_view rows and count distinct (path, ip, day) per normalized path —
   // URL normalization is easier here than in SQL. Volume is tiny for this site.
-  let pages: Array<{ path: string; uniques: number }> = [];
+  let pages: Array<{ path: string; uniques: number; total: number }> = [];
   try {
     const pv = await env.DB.prepare(
       "SELECT current_url, ip, day FROM events WHERE event_type = 'page_view' AND day BETWEEN ?1 AND ?2"
@@ -135,17 +135,19 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       .all();
     const rows = (pv.results ?? []) as Array<{ current_url: string; ip: string; day: string }>;
     const seen = new Set<string>();
-    const counts = new Map<string, number>();
+    const uniqueCounts = new Map<string, number>();
+    const totalCounts = new Map<string, number>();
     for (const r of rows) {
       const path = normalizePath(r.current_url);
       if (path === '/admin' || path.startsWith('/admin/')) continue;
+      totalCounts.set(path, (totalCounts.get(path) ?? 0) + 1);
       const key = `${path}|${r.ip}|${r.day}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      counts.set(path, (counts.get(path) ?? 0) + 1);
+      uniqueCounts.set(path, (uniqueCounts.get(path) ?? 0) + 1);
     }
-    pages = [...counts.entries()]
-      .map(([path, uniques]) => ({ path, uniques }))
+    pages = [...totalCounts.entries()]
+      .map(([path, total]) => ({ path, total, uniques: uniqueCounts.get(path) ?? 0 }))
       .sort((a, b) => b.uniques - a.uniques);
   } catch {
     pages = [];
