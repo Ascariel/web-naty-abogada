@@ -1,10 +1,10 @@
-# Astro Starter Kit: Minimal
+# Natalia Vallejos — Abogada
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Static marketing site for Natalia Vallejos Gutiérrez, abogada en Santiago, Chile (Derecho de Familia).
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+**Production domain:** https://tranquilidadlegal.cl/
+
+Built with Astro. See [`CLAUDE.md`](./CLAUDE.md) for architecture, deploy details, and conventions.
 
 ## 🚀 Project Structure
 

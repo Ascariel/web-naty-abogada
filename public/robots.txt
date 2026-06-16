@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://web-naty-abogada.pages.dev/sitemap-index.xml
+Sitemap: https://tranquilidadlegal.cl/sitemap-index.xml
