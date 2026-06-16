@@ -117,9 +117,18 @@ const baseJsonLd = {
               var href = a.getAttribute('href') || '';
               if (/wa\.me|api\.whatsapp\.com|whatsapp/i.test(href)) {
                 track('whatsapp_btn_click');
-              } else if (/^mailto:|^tel:/i.test(href)) {
-                track('contact_info_click');
+                return;
               }
+              // Contact: email/phone links, or any link that leads to /contacto
+              // (nav item, footer links, CTA buttons — base prefix tolerated).
+              var isContact = /^mailto:|^tel:/i.test(href);
+              if (!isContact && href) {
+                try {
+                  var p = (new URL(href, location.href).pathname || '').replace(/\/+$/, '');
+                  if (p === '/contacto' || p.endsWith('/contacto')) isContact = true;
+                } catch (e2) {}
+              }
+              if (isContact) track('contact_info_click');
             },
             true
           );
