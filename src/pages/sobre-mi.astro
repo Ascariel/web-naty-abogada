@@ -126,7 +126,7 @@ const values = [
 
       <div class="formacion-cta">
         <a class="btn btn-gold" href={whatsappLink()} target="_blank" rel="noopener">
-          Conversemos por WhatsApp
+          Hablemos por WhatsApp
         </a>
       </div>
     </div>
@@ -227,5 +227,14 @@ const values = [
   @media (max-width: 800px) {
     .about-grid { grid-template-columns: 1fr; gap: 36px; }
     .photo-placeholder { position: static; max-width: 320px; margin-inline: auto; width: 100%; }
+  }
+
+  /* Phones: shrink the placeholder to a small monogram avatar so it doesn't
+     push the bio below the fold (it's just a placeholder until there's a photo). */
+  @media (max-width: 600px) {
+    .about-grid { gap: 18px; }
+    .photo-placeholder { aspect-ratio: 1 / 1; max-width: 116px; }
+    .photo-mark { font-size: 2.2rem; }
+    .photo-caption { display: none; }
   }
 </style>
