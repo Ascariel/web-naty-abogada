@@ -93,9 +93,10 @@ const baseJsonLd = {
           var h = location.hostname;
           if (/localhost|127\.|0\.0\.0\.0|github\.io/.test(h)) return;
 
-          function track(type, path) {
+          function track(type) {
             try {
-              var payload = JSON.stringify({ type: type, path: path || location.pathname });
+              // current_url = the page the visitor is on when the event fires.
+              var payload = JSON.stringify({ type: type, current_url: location.href });
               if (navigator.sendBeacon) {
                 navigator.sendBeacon('/api/track', payload);
               } else {
@@ -105,7 +106,7 @@ const baseJsonLd = {
           }
 
           if (location.pathname.indexOf('/admin') !== 0) {
-            track('page_view', location.pathname);
+            track('page_view');
           }
 
           document.addEventListener(
@@ -115,9 +116,9 @@ const baseJsonLd = {
               if (!a) return;
               var href = a.getAttribute('href') || '';
               if (/wa\.me|api\.whatsapp\.com|whatsapp/i.test(href)) {
-                track('whatsapp_btn_click', href);
+                track('whatsapp_btn_click');
               } else if (/^mailto:|^tel:/i.test(href)) {
-                track('contact_info_click', href);
+                track('contact_info_click');
               }
             },
             true

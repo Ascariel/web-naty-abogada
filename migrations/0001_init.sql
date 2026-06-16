@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS events (
   day TEXT NOT NULL,          -- YYYY-MM-DD in America/Santiago
   event_type TEXT NOT NULL,   -- page_view | whatsapp_btn_click | contact_info_click | ...
   ip TEXT NOT NULL,           -- raw client IP (CF-Connecting-IP)
-  path TEXT,                  -- page path, or the clicked link's href
+  current_url TEXT,           -- full page URL the visitor was on when the event fired
   created_at INTEGER NOT NULL -- epoch ms
 );
 

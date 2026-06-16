@@ -2,7 +2,7 @@
  * POST /api/track — records a single event.
  *
  * Public (no auth). Called fire-and-forget by beacons in Base.astro.
- * Body: { type?: string, path?: string }. `type` defaults to "page_view".
+ * Body: { type?: string, current_url?: string }. `type` defaults to "page_view".
  *
  * Stores the raw client IP (for abuse/bot forensics). Unique counts are derived
  * downstream as one per IP per day.
@@ -36,19 +36,19 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   }
 
   let eventType = 'page_view';
-  let path = '/';
+  let currentUrl = '';
   try {
-    const body = (await request.json()) as { type?: string; path?: string } | null;
+    const body = (await request.json()) as { type?: string; current_url?: string } | null;
     if (body) {
       if (typeof body.type === 'string' && EVENT_TYPE_RE.test(body.type)) {
         eventType = body.type;
       }
-      if (typeof body.path === 'string') {
-        path = body.path.slice(0, 256);
+      if (typeof body.current_url === 'string') {
+        currentUrl = body.current_url.slice(0, 512);
       }
     }
   } catch {
-    // No/invalid body → default page_view at "/".
+    // No/invalid body → default page_view with empty current_url.
   }
 
   const ip =
@@ -60,9 +60,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
   try {
     await env.DB.prepare(
-      'INSERT INTO events (day, event_type, ip, path, created_at) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO events (day, event_type, ip, current_url, created_at) VALUES (?, ?, ?, ?, ?)'
     )
-      .bind(day, eventType, ip, path, Date.now())
+      .bind(day, eventType, ip, currentUrl, Date.now())
       .run();
   } catch {
     return new Response(null, { status: 204 });
