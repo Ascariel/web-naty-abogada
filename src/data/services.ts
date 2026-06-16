@@ -233,7 +233,7 @@ export const services: Service[] = [
       'La Ley 21.331 reconoce el derecho a la salud mental en igualdad con la salud física. Sin embargo, las Isapres siguen imponiendo topes anuales a las prestaciones psicológicas y psiquiátricas, lo que es contrario al espíritu de la ley.',
       'A través de un recurso de protección ante la Corte de Apelaciones, podemos obtener la eliminación de esos topes y la cobertura íntegra de tu tratamiento. El plazo es breve (3 a 6 meses) y la tasa de éxito en cortes es muy alta.',
     ],
-    priceRange: 'Desde $80.000 pago único · o cuota litis 15% del beneficio',
+    priceRange: 'Desde $65.000 pago único',
     pricingModel: 'Mixto · sin costo inicial disponible',
     featured: true,
   },
