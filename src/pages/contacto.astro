@@ -11,7 +11,7 @@ import Icon from '../components/Icon.astro';
   <section class="section">
     <div class="container container--narrow">
       <span class="eyebrow">Contacto</span>
-      <h1>Conversemos sobre tu caso</h1>
+      <h1>Hablemos de tu caso</h1>
       <p class="lead">
         El canal más rápido para llegar a mí es WhatsApp. Te respondo
         personalmente, normalmente dentro de las próximas horas en horario
@@ -192,5 +192,14 @@ import Icon from '../components/Icon.astro';
 
   @media (max-width: 600px) {
     .contact-grid { grid-template-columns: 1fr; }
+
+    .lead {
+      font-size: 0.8rem;
+      line-height: 1.55;
+    }
+
+    .section {
+      padding-block: clamp(28px, 8vw, 56px);
+    }
   }
 </style>
