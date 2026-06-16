@@ -48,27 +48,8 @@
 
       <section class="kpis" id="kpis"></section>
 
-      <section class="card">
-        <div class="card-head">
-          <div>
-            <h2>Eventos totales</h2>
-            <p>Cada acción, incluso repetida por la misma persona.</p>
-          </div>
-        </div>
-        <div class="canvas-holder"><canvas id="chart-total"></canvas></div>
-        <p class="empty" id="empty-total" hidden>Sin datos en este rango.</p>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <div>
-            <h2>Eventos únicos</h2>
-            <p>Una sola vez por IP por día, para cada tipo de evento.</p>
-          </div>
-        </div>
-        <div class="canvas-holder"><canvas id="chart-unique"></canvas></div>
-        <p class="empty" id="empty-unique" hidden>Sin datos en este rango.</p>
-      </section>
+      <section class="charts" id="charts"></section>
+      <p class="empty card" id="empty" hidden>Sin datos en este rango.</p>
     </div>
 
     <script is:inline>
@@ -89,8 +70,7 @@
         const meta = (t, i) => EVENT_META[t] || { label: t, color: FALLBACK[i % FALLBACK.length] };
 
         let granularity = 'day';
-        let totalChart = null;
-        let uniqueChart = null;
+        let charts = [];
 
         // Defaults: last 30 days.
         const today = new Date();
@@ -148,33 +128,12 @@
           const { ctx: c, chartArea } = ctx.chart;
           if (!chartArea) return color + '22';
           const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          g.addColorStop(0, color + '40');
+          g.addColorStop(0, color + '38');
           g.addColorStop(1, color + '00');
           return g;
         }
 
-        function datasets(data, kind) {
-          const showPoints = data.periods.length <= 2;
-          return data.eventTypes.map((t, i) => {
-            const m = meta(t, i);
-            return {
-              label: m.label,
-              data: (data.series[t] && data.series[t][kind]) || [],
-              borderColor: m.color,
-              backgroundColor: (c) => gradient(c, m.color),
-              fill: true,
-              tension: 0.35,
-              borderWidth: 2.5,
-              pointRadius: showPoints ? 4 : 0,
-              pointHoverRadius: 5,
-              pointBackgroundColor: m.color,
-              pointBorderColor: '#fff',
-              pointBorderWidth: 1.5,
-            };
-          });
-        }
-
-        function options() {
+        function chartOptions() {
           return {
             responsive: true,
             maintainAspectRatio: false,
@@ -183,7 +142,7 @@
               legend: {
                 position: 'top',
                 align: 'end',
-                labels: { usePointStyle: true, pointStyle: 'circle', boxHeight: 7, padding: 18, color: '#374151' },
+                labels: { usePointStyle: true, pointStyle: 'circle', boxHeight: 7, padding: 16, color: '#374151' },
               },
               tooltip: {
                 backgroundColor: '#0f172a',
@@ -212,31 +171,81 @@
           };
         }
 
-        function drawChart(existing, canvasId, emptyId, data, kind) {
-          const hasData = data.periods.length > 0 && data.eventTypes.length > 0;
-          const canvas = $(canvasId);
-          $(emptyId).hidden = hasData;
-          canvas.style.display = hasData ? '' : 'none';
-          if (!hasData) {
-            if (existing) existing.destroy();
-            return null;
-          }
-          if (existing) {
-            existing.data = { labels: data.periods, datasets: datasets(data, kind) };
-            existing.update();
-            return existing;
-          }
+        // One chart per event type: a solid "Total" line (area-filled) and a
+        // dashed "Únicas" line, both in the event's colour.
+        function makeChart(canvas, color, periods, totalSeries, uniqueSeries) {
+          const showPoints = periods.length <= 2;
+          const common = {
+            tension: 0.35,
+            pointHoverRadius: 5,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 1.5,
+          };
           return new Chart(canvas.getContext('2d'), {
             type: 'line',
-            data: { labels: data.periods, datasets: datasets(data, kind) },
-            options: options(),
+            data: {
+              labels: periods,
+              datasets: [
+                {
+                  label: 'Total',
+                  data: totalSeries,
+                  borderColor: color,
+                  backgroundColor: (c) => gradient(c, color),
+                  fill: true,
+                  borderWidth: 2.5,
+                  pointRadius: showPoints ? 4 : 0,
+                  pointBackgroundColor: color,
+                  ...common,
+                },
+                {
+                  label: 'Únicas',
+                  data: uniqueSeries,
+                  borderColor: color,
+                  backgroundColor: 'transparent',
+                  fill: false,
+                  borderWidth: 2,
+                  borderDash: [5, 4],
+                  pointRadius: showPoints ? 4 : 0,
+                  pointBackgroundColor: color,
+                  ...common,
+                },
+              ],
+            },
+            options: chartOptions(),
           });
         }
 
         function render(data) {
           renderKpis(data);
-          totalChart = drawChart(totalChart, 'chart-total', 'empty-total', data, 'total');
-          uniqueChart = drawChart(uniqueChart, 'chart-unique', 'empty-unique', data, 'unique');
+
+          // Tear down previous charts.
+          charts.forEach((c) => c.destroy());
+          charts = [];
+
+          const wrap = $('charts');
+          const hasData = data.periods.length > 0 && data.eventTypes.length > 0;
+          $('empty').hidden = hasData;
+          wrap.hidden = !hasData;
+          wrap.innerHTML = '';
+          if (!hasData) return;
+
+          data.eventTypes.forEach((t, i) => {
+            const m = meta(t, i);
+            const tot = data.totals[t] || { total: 0, unique: 0 };
+            const card = document.createElement('section');
+            card.className = 'card chart-card';
+            card.innerHTML = `
+              <div class="card-head">
+                <div class="ch-title"><span class="ch-dot" style="background:${m.color}"></span><h2>${m.label}</h2></div>
+                <div class="ch-meta">Total <strong>${fmt(tot.total)}</strong> · Únicas <strong>${fmt(tot.unique)}</strong></div>
+              </div>
+              <div class="canvas-holder"><canvas></canvas></div>`;
+            wrap.appendChild(card);
+            const canvas = card.querySelector('canvas');
+            charts.push(
+              makeChart(canvas, m.color, data.periods, data.series[t].total, data.series[t].unique)
+            );
+          });
         }
 
         // Segmented control
@@ -384,23 +393,34 @@
       .kpi-meta strong { color: var(--ink); font-weight: 700; }
       .kpi-empty { color: var(--muted); grid-column: 1 / -1; }
 
-      /* Chart cards */
+      /* Chart cards — one per event type */
       .card {
         background: var(--card); border: 1px solid var(--line);
         border-radius: var(--radius); padding: 22px 24px 24px;
-        box-shadow: var(--shadow); margin-bottom: 20px;
+        box-shadow: var(--shadow);
       }
-      .card-head { margin-bottom: 8px; }
-      .card-head h2 { margin: 0; font-size: 1.12rem; font-weight: 650; color: var(--navy); letter-spacing: -0.01em; }
-      .card-head p { margin: 3px 0 0; color: var(--muted); font-size: 0.85rem; }
-      .canvas-holder { position: relative; height: 320px; margin-top: 14px; }
-      .empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 0.92rem; }
+      .charts {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+        gap: 20px;
+      }
+      .card-head {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: 12px; flex-wrap: wrap; margin-bottom: 6px;
+      }
+      .ch-title { display: flex; align-items: center; gap: 9px; }
+      .ch-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+      .card-head h2 { margin: 0; font-size: 1.08rem; font-weight: 650; color: var(--navy); letter-spacing: -0.01em; }
+      .ch-meta { color: var(--muted); font-size: 0.84rem; }
+      .ch-meta strong { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+      .canvas-holder { position: relative; height: 260px; margin-top: 14px; }
+      .empty { text-align: center; color: var(--muted); padding: 48px 0; font-size: 0.92rem; }
 
       @media (max-width: 640px) {
         .page { padding: 28px 16px 60px; }
         .toolbar { gap: 12px; }
         .field, .field input[type='date'] { width: 100%; }
-        .canvas-holder { height: 260px; }
+        .charts { grid-template-columns: 1fr; }
+        .canvas-holder { height: 240px; }
       }
     </style>
     <!-- global: KPI cards are injected by JS and wouldn't match Astro's scoped
