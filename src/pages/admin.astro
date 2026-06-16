@@ -1,0 +1,318 @@
+---
+// Internal analytics dashboard. Access is gated by functions/_middleware.ts
+// (HTTP Basic Auth: admin / ADMIN_PASSWORD). Standalone — it deliberately does
+// not use Base.astro (no public header/footer/WhatsApp float). Data comes from
+// /api/stats, which the browser calls with the same Basic Auth credentials.
+---
+
+<!doctype html>
+<html lang="es-CL">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Estadísticas de visitas — Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="head">
+        <h1>Estadísticas de visitas</h1>
+        <p class="sub">tranquilidadlegal.cl · visitas registradas (bots excluidos)</p>
+      </header>
+
+      <form id="filters" class="filters">
+        <label>
+          Desde
+          <input type="date" id="from" name="from" />
+        </label>
+        <label>
+          Hasta
+          <input type="date" id="to" name="to" />
+        </label>
+        <label>
+          Agrupar por
+          <select id="granularity" name="granularity">
+            <option value="day">Día</option>
+            <option value="week">Semana</option>
+            <option value="month">Mes</option>
+          </select>
+        </label>
+        <button type="submit">Aplicar</button>
+      </form>
+
+      <section class="cards">
+        <div class="card">
+          <span class="card-label">Visitas totales</span>
+          <span class="card-value" id="total-views">—</span>
+        </div>
+        <div class="card">
+          <span class="card-label">Visitas únicas</span>
+          <span class="card-value" id="total-uniques">—</span>
+        </div>
+        <div class="card">
+          <span class="card-label">Rango</span>
+          <span class="card-value small" id="range-label">—</span>
+        </div>
+      </section>
+
+      <section class="chart-box">
+        <canvas id="chart" height="110"></canvas>
+        <p class="empty" id="empty" hidden>Sin datos en este rango.</p>
+      </section>
+
+      <section class="table-box">
+        <table id="table">
+          <thead>
+            <tr><th>Periodo</th><th>Visitas</th><th>Únicas</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <p class="status" id="status"></p>
+    </main>
+
+    <script is:inline>
+      (function () {
+        const $ = (id) => document.getElementById(id);
+        const fmtNum = (n) => new Intl.NumberFormat('es-CL').format(n);
+        const isoLocal = (d) => {
+          const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+          return z.toISOString().slice(0, 10);
+        };
+
+        // Default range: last 30 days.
+        const today = new Date();
+        const past = new Date(today.getTime() - 29 * 86400000);
+        $('from').value = isoLocal(past);
+        $('to').value = isoLocal(today);
+
+        let chart = null;
+
+        async function load() {
+          const from = $('from').value;
+          const to = $('to').value;
+          const granularity = $('granularity').value;
+          $('status').textContent = 'Cargando…';
+
+          let data;
+          try {
+            const res = await fetch(
+              `/api/stats?from=${from}&to=${to}&granularity=${granularity}`,
+              { headers: { Accept: 'application/json' } }
+            );
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            data = await res.json();
+          } catch (err) {
+            $('status').textContent = 'Error al cargar datos: ' + err.message;
+            return;
+          }
+          $('status').textContent = '';
+          render(data);
+        }
+
+        function render(data) {
+          $('total-views').textContent = fmtNum(data.totals.views);
+          $('total-uniques').textContent = fmtNum(data.totals.uniques);
+          $('range-label').textContent = `${data.from} → ${data.to}`;
+
+          const rows = data.rows || [];
+          const labels = rows.map((r) => r.period);
+          const views = rows.map((r) => r.views);
+          const uniques = rows.map((r) => r.uniques);
+
+          // Table
+          const tbody = document.querySelector('#table tbody');
+          tbody.innerHTML = rows
+            .map(
+              (r) =>
+                `<tr><td>${r.period}</td><td>${fmtNum(r.views)}</td><td>${fmtNum(
+                  r.uniques
+                )}</td></tr>`
+            )
+            .join('');
+
+          // Chart
+          const empty = $('empty');
+          const canvas = $('chart');
+          if (!rows.length) {
+            empty.hidden = false;
+            canvas.style.display = 'none';
+            if (chart) { chart.destroy(); chart = null; }
+            return;
+          }
+          empty.hidden = true;
+          canvas.style.display = '';
+
+          const cfg = {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: 'Visitas',
+                  data: views,
+                  borderColor: '#0e2a47',
+                  backgroundColor: 'rgba(14,42,71,0.08)',
+                  tension: 0.25,
+                  fill: true,
+                  pointRadius: 3,
+                },
+                {
+                  label: 'Únicas',
+                  data: uniques,
+                  borderColor: '#c9a864',
+                  backgroundColor: 'rgba(201,168,100,0.10)',
+                  tension: 0.25,
+                  fill: true,
+                  pointRadius: 3,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } },
+              },
+              plugins: { legend: { position: 'top' } },
+            },
+          };
+
+          if (chart) {
+            chart.data = cfg.data;
+            chart.update();
+          } else {
+            chart = new Chart(canvas.getContext('2d'), cfg);
+          }
+        }
+
+        $('filters').addEventListener('submit', (e) => {
+          e.preventDefault();
+          load();
+        });
+
+        // Chart.js is loaded with `defer`; wait for it before first render.
+        function start() {
+          if (window.Chart) load();
+          else setTimeout(start, 50);
+        }
+        start();
+      })();
+    </script>
+
+    <style>
+      :root {
+        --navy: #0e2a47;
+        --gold: #c9a864;
+        --cream: #fbf7eb;
+        --border: #e2dcc9;
+        --muted: #6b6b6b;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: #1a1a1a;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.5;
+      }
+      .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
+      .head h1 { margin: 0 0 4px; color: var(--navy); font-size: 1.7rem; }
+      .sub { margin: 0 0 24px; color: var(--muted); font-size: 0.9rem; }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: 16px;
+        background: #fff;
+        border: 1px solid var(--border);
+        padding: 18px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+      }
+      .filters label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .filters input,
+      .filters select {
+        font: inherit;
+        padding: 9px 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+        color: #1a1a1a;
+      }
+      .filters button {
+        font: inherit;
+        font-weight: 600;
+        padding: 10px 22px;
+        border: 0;
+        border-radius: 6px;
+        background: var(--navy);
+        color: var(--cream);
+        cursor: pointer;
+      }
+      .filters button:hover { background: #14375c; }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .card-label {
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .card-value { font-size: 2rem; font-weight: 700; color: var(--navy); }
+      .card-value.small { font-size: 1rem; font-weight: 600; }
+
+      .chart-box {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        min-height: 280px;
+        position: relative;
+      }
+      .empty { text-align: center; color: var(--muted); padding: 60px 0; }
+
+      .table-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+      th, td { padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+      th { background: #faf7ee; color: var(--navy); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; }
+      tbody tr:last-child td { border-bottom: 0; }
+      td:nth-child(2), td:nth-child(3), th:nth-child(2), th:nth-child(3) { text-align: right; }
+
+      .status { color: var(--muted); font-size: 0.88rem; margin-top: 16px; min-height: 1.2em; }
+
+      @media (max-width: 640px) {
+        .cards { grid-template-columns: 1fr; }
+      }
+    </style>
+  </body>
+</html>

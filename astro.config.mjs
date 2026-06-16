@@ -21,7 +21,7 @@ const site = isGitHubPages
 export default defineConfig({
   site,
   base,
-  integrations: [sitemap()],
+  integrations: [sitemap({ filter: (page) => !page.includes('/admin') })],
   trailingSlash: 'ignore',
   build: {
     inlineStylesheets: 'auto',

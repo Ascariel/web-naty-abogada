@@ -83,6 +83,25 @@ const baseJsonLd = {
     <Footer />
     <WhatsAppFloat />
 
+    <!-- Visit beacon → /api/track (Cloudflare Function). Fire-and-forget, bots
+         excluded server-side. Skips localhost, the GitHub Pages mirror, and
+         the gated /admin pages. -->
+    <script is:inline>
+      (function () {
+        try {
+          var h = location.hostname;
+          if (/localhost|127\.|0\.0\.0\.0|github\.io/.test(h)) return;
+          if (location.pathname.indexOf('/admin') === 0) return;
+          var payload = JSON.stringify({ path: location.pathname });
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon('/api/track', payload);
+          } else {
+            fetch('/api/track', { method: 'POST', body: payload, keepalive: true });
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       .skip-link {
         position: absolute;

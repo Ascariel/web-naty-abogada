@@ -68,6 +68,40 @@ Two automatic deploys are wired up:
 
 Both deploys come from the same commit; the difference is which env var is present at build time.
 
+## Analytics / visit tracking (Cloudflare only)
+
+A small backend tracks page views and powers a password-gated dashboard at **`/admin`**.
+It runs only on Cloudflare Pages (the GitHub Pages mirror has no Functions/D1; the beacon
+is guarded off there).
+
+**How it works**
+- `src/layouts/Base.astro` has a fire-and-forget beacon that POSTs to `/api/track` on every
+  page load (skips localhost, `*.github.io`, and `/admin*`).
+- `functions/api/track.ts` records the view in **D1**. Bots are excluded by User-Agent. Privacy:
+  it stores `SHA-256(IP_SALT | ip | day)`, **never the raw IP** — that still gives one unique
+  per IP per day (the day is baked into the hash).
+- `functions/api/stats.ts` returns counts aggregated by `day | week | month`, filterable by date.
+- `functions/_middleware.ts` gates `/admin` and `/api/stats` with HTTP Basic Auth
+  (`admin` / `ADMIN_PASSWORD`). It **fails closed** if the secret isn't set.
+- `src/pages/admin.astro` is the dashboard (Chart.js via CDN). Schema lives in `migrations/0001_init.sql`.
+
+**One-time setup — all in the Cloudflare dashboard** (Workers & Pages → the Pages project).
+The repo intentionally has **no `wrangler.toml`** (a committed one would override dashboard
+bindings), so the dashboard is the single source of truth:
+1. **D1 → Create database** named `naty-analytics`. Open its console and run the contents of
+   `migrations/0001_init.sql`.
+2. Project → **Settings → Functions → D1 database bindings** → add binding **`DB`** → `naty-analytics`
+   (Production, and Preview if you want).
+3. Project → **Settings → Environment variables** → add (type *Secret*):
+   `ADMIN_PASSWORD` = `passpass` (change anytime) and `IP_SALT` = a long random string. Set for Production.
+4. **Redeploy** (push, or "Retry deployment") so the new bindings take effect. Then visit the site
+   and open `https://tranquilidadlegal.cl/admin` (login `admin` / `passpass`).
+
+**Local dev** (optional): create a local `wrangler.toml` (gitignored) with a `[[d1_databases]]`
+binding `DB`→`naty-analytics`, put `ADMIN_PASSWORD`/`IP_SALT` in `.dev.vars`, then
+`wrangler d1 execute naty-analytics --local --file=migrations/0001_init.sql` and
+`npm run build && npx wrangler pages dev dist`.
+
 ## Migrating to a custom domain (when registered)
 
 1. In `astro.config.mjs`: drop the conditional and just set `site: '<domain>'` and `base: '/'`. Decommission whichever deploy you're abandoning (most likely GitHub Pages, since Cloudflare's free tier is more permissive and faster).
