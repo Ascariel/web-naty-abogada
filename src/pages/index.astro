@@ -393,9 +393,14 @@ const faqs = [
     /* Hide just the direct-child spacers, not the <br> inside pill labels. */
     .hero-inner > br { display: none; }
 
+    .hero {
+      padding-block: clamp(32px, 1.7vw, 22px);
+      background: var(--cream);
+    }
+
     /* Smaller lead so it doesn't compete with the title. */
     .hero-lead {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       line-height: 1.5;
       margin: 12px auto 18px;
     }
@@ -411,6 +416,20 @@ const faqs = [
 
     .hero-areas li { align-items: flex-start; gap: 8px; }
     .hero-areas svg { width: 22px; height: 22px; margin-top: 1px; }
+
+    /* The caption wraps to 2 lines on mobile; flow the icon inline with the
+       text so it hugs the caption instead of floating detached at the left. */
+    .hero-reassurance {
+      display: block;
+      text-align: center;
+    }
+    .hero-reassurance svg {
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+      position: relative;
+      top: -1px;
+    }
   }
 
   /* Reassurance bar (4-up) */
