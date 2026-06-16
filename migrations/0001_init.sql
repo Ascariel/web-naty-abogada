@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS events (
   referrer TEXT,
   utm_source TEXT,
   utm_medium TEXT,
-  utm_campaign TEXT
+  utm_campaign TEXT,
+  is_bot INTEGER DEFAULT 0,
+  bot_reason TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_events_day ON events(day);
 CREATE INDEX IF NOT EXISTS idx_events_type_day ON events(event_type, day);

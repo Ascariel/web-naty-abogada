@@ -78,7 +78,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
            COUNT(*) AS total,
            COUNT(DISTINCT ip || '|' || day) AS uniques
     FROM events
-    WHERE day BETWEEN ?1 AND ?2
+    WHERE day BETWEEN ?1 AND ?2 AND COALESCE(is_bot, 0) = 0
     GROUP BY period, event_type
     ORDER BY period`;
 
@@ -131,7 +131,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const pv = await env.DB.prepare(
       `SELECT current_url, ip, day, country, city, region, as_org, device, os, browser,
               lang, referrer, utm_source, utm_medium, utm_campaign
-       FROM events WHERE event_type = 'page_view' AND day BETWEEN ?1 AND ?2`
+       FROM events WHERE event_type = 'page_view' AND day BETWEEN ?1 AND ?2
+              AND COALESCE(is_bot, 0) = 0`
     )
       .bind(from, to)
       .all();
@@ -155,9 +156,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       .sort((a, b) => b.uniques - a.uniques);
 
     // Audience breakdowns. Each dimension maps a row to a label.
-    const dims: Record<string, (r: Record<string, string | null>) => string> = {
+    const dims: Record<string, (r: Record<string, string | null>) => string | null> = {
       country: (r) => r.country || '—',
       city: (r) => r.city || '—',
+      cityCl: (r) => (r.country === 'CL' ? r.city || '—' : null), // Chile only
       device: (r) => r.device || '—',
       os: (r) => r.os || '—',
       browser: (r) => r.browser || '—',
@@ -175,7 +177,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     }
     for (const r of pvRows) {
       for (const k of Object.keys(dims)) {
-        const v = dims[k](r) || '—';
+        const v = dims[k](r);
+        if (!v) continue; // dimension not applicable to this row (e.g. cityCl for non-CL)
         tot[k].set(v, (tot[k].get(v) ?? 0) + 1);
         const ukey = `${v}|${r.ip}|${r.day}`;
         if (!uniqSeen[k].has(ukey)) {
@@ -194,8 +197,47 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     pages = [];
   }
 
+  // Filtered traffic (bots/crawlers): how much we excluded, and why/where from.
+  let botsFiltered: {
+    total: number;
+    pct: number;
+    byReason: Array<{ value: string; count: number }>;
+    byOrg: Array<{ value: string; count: number }>;
+  } = { total: 0, pct: 0, byReason: [], byOrg: [] };
+  try {
+    const allRow = (await env.DB.prepare(
+      'SELECT COUNT(*) AS c FROM events WHERE day BETWEEN ?1 AND ?2'
+    )
+      .bind(from, to)
+      .first()) as { c: number } | null;
+    const totalAll = allRow?.c ?? 0;
+
+    const br = await env.DB.prepare(
+      'SELECT bot_reason, as_org FROM events WHERE COALESCE(is_bot,0)=1 AND day BETWEEN ?1 AND ?2'
+    )
+      .bind(from, to)
+      .all();
+    const botRows = (br.results ?? []) as Array<{ bot_reason: string | null; as_org: string | null }>;
+    const reason = new Map<string, number>();
+    const org = new Map<string, number>();
+    for (const r of botRows) {
+      const rs = r.bot_reason || 'otro';
+      reason.set(rs, (reason.get(rs) ?? 0) + 1);
+      const o = r.as_org || '—';
+      org.set(o, (org.get(o) ?? 0) + 1);
+    }
+    botsFiltered = {
+      total: botRows.length,
+      pct: totalAll ? Math.round((botRows.length / totalAll) * 100) : 0,
+      byReason: [...reason.entries()].map(([value, count]) => ({ value, count })).sort((a, b) => b.count - a.count),
+      byOrg: [...org.entries()].map(([value, count]) => ({ value, count })).sort((a, b) => b.count - a.count).slice(0, 8),
+    };
+  } catch {
+    // leave defaults
+  }
+
   return Response.json(
-    { granularity, from, to, periods, eventTypes, series, totals, pages, breakdowns },
+    { granularity, from, to, periods, eventTypes, series, totals, pages, breakdowns, botsFiltered },
     { headers: { 'Cache-Control': 'no-store' } }
   );
 };

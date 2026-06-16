@@ -13,9 +13,28 @@ interface Env {
 }
 
 const BOT_RE =
-  /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|slackbot|whatsapp|telegrambot|discordbot|embedly|skypeuripreview|headless|lighthouse|gpt|python-requests|axios|curl|wget|node-fetch|phantom|puppeteer|playwright|preview|monitor|pingdom|uptime/i;
+  /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|slackbot|whatsapp|telegrambot|discordbot|embedly|skypeuripreview|headless|lighthouse|gpt|ccbot|claudebot|amazonbot|applebot|yandex|baidu|duckduckbot|petalbot|bytespider|ahrefs|semrush|mj12|dotbot|dataforseo|serpstat|screaming\s?frog|python-requests|axios|curl|wget|node-fetch|go-http|okhttp|java\/|libwww|lwp|winhttp|httpclient|scrapy|postman|insomnia|selenium|webdriver|phantom|puppeteer|playwright|preview|monitor|pingdom|uptime|statuscake|gtmetrix|chrome-lighthouse/i;
+
+// Hosting / cloud networks — real Chilean visitors never browse from these, so
+// traffic from them is almost certainly a scraper/monitor. Cloudflare, Akamai,
+// Fastly and Apple are deliberately EXCLUDED to avoid flagging real users on
+// Cloudflare WARP or Apple iCloud Private Relay.
+const DATACENTER_RE =
+  /amazon|aws\b|google cloud|google llc|googleuser|\bgcp\b|microsoft|\bazure\b|digitalocean|digital ocean|linode|hetzner|\bovh\b|leaseweb|contabo|vultr|scaleway|choopa|\bm247\b|datacamp|oracle|alibaba|aliyun|tencent|huawei|upcloud|kamatera|hostwinds|colocrossing|psychz|quadranet|ionos|namecheap|godaddy|bluehost|hostgator|hostinger|datacenter|data center|colocation|hosting|\bvps\b/i;
 
 const EVENT_TYPE_RE = /^[a-z][a-z0-9_]{0,39}$/;
+
+function detectBot(
+  ua: string,
+  asOrg: string | null,
+  body: Record<string, unknown>
+): { bot: boolean; reason: string | null } {
+  if (!ua) return { bot: true, reason: 'no_ua' };
+  if (BOT_RE.test(ua)) return { bot: true, reason: 'ua' };
+  if (body.webdriver === true) return { bot: true, reason: 'webdriver' };
+  if (asOrg && DATACENTER_RE.test(asOrg)) return { bot: true, reason: 'datacenter' };
+  return { bot: false, reason: null };
+}
 
 function santiagoDay(now: Date): string {
   return new Intl.DateTimeFormat('en-CA', {
@@ -60,9 +79,6 @@ function str(v: unknown, max = 160): string | null {
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const ua = request.headers.get('User-Agent') ?? '';
-  if (!ua || BOT_RE.test(ua)) {
-    return new Response(null, { status: 204 });
-  }
 
   let eventType = 'page_view';
   let currentUrl = '';
@@ -89,6 +105,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const city = str(cf.city, 80);
   const region = str(cf.region, 80);
   const asOrg = str(cf.asOrganization, 120);
+
+  // Bot / crawler detection: UA list, automation flag, or hosting/datacenter ISP.
+  const { bot, reason } = detectBot(ua, asOrg, body);
 
   // Language: prefer what the client sent, else Accept-Language.
   const lang =
@@ -119,13 +138,13 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       `INSERT INTO events
        (day, event_type, ip, current_url, created_at,
         country, city, region, as_org, device, os, browser, lang, referrer,
-        utm_source, utm_medium, utm_campaign)
-       VALUES (?,?,?,?,?, ?,?,?,?,?,?,?,?,?, ?,?,?)`
+        utm_source, utm_medium, utm_campaign, is_bot, bot_reason)
+       VALUES (?,?,?,?,?, ?,?,?,?,?,?,?,?,?, ?,?,?,?,?)`
     )
       .bind(
         day, eventType, ip, currentUrl, Date.now(),
         country, city, region, asOrg, device, os, browser, lang, referrer,
-        utmSource, utmMedium, utmCampaign
+        utmSource, utmMedium, utmCampaign, bot ? 1 : 0, reason
       )
       .run();
   } catch {

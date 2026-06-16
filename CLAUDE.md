@@ -93,6 +93,12 @@ automatically.
   User-Agent, plus `lang`, `referrer`, and `utm_source`/`utm_medium`/`utm_campaign`
   (first-touch, sent by the beacon and/or parsed from the URL; an `fbclid` → `utm_source=facebook`).
   Note: `request.cf` is empty in `wrangler pages dev` — geo only fills at the edge (prod).
+- **Bot/crawler filtering (strict).** Every event is flagged `is_bot` + `bot_reason` via:
+  expanded User-Agent regex, `navigator.webdriver` (automation), and a **datacenter/hosting
+  ASN** check on `as_org` (AWS, GCP, Azure, OVH, Hetzner, DigitalOcean…) — Cloudflare WARP /
+  Apple Private Relay are deliberately NOT flagged. Flagged events are still stored (for audit)
+  but `stats.ts` excludes `is_bot=1` from every query; the dashboard shows a "Tráfico filtrado"
+  panel (total, % of traffic, by reason, by network).
 - `functions/api/stats.ts` returns, per event type, total + unique series aggregated by
   `day | week | month`, filterable by date.
 - `functions/_middleware.ts` gates `/admin` and `/api/stats` with HTTP Basic Auth
@@ -107,7 +113,8 @@ The repo intentionally has **no `wrangler.toml`** (a committed one would overrid
 bindings), so the dashboard is the single source of truth:
 1. **D1 → Create database** named `naty-analytics`. Open its console and run the contents of
    `migrations/0001_init.sql`. If the `events` table already exists from an older version,
-   run `migrations/0002_add_enrichment.sql` instead (adds the enrichment columns).
+   run `migrations/0002_add_enrichment.sql` then `migrations/0003_bot_flags.sql` (each adds
+   columns to the existing table).
 2. Project → **Settings → Functions → D1 database bindings** → add binding **`DB`** → `naty-analytics`
    (Production, and Preview if you want).
 3. Project → **Settings → Environment variables** → add (type *Secret*):

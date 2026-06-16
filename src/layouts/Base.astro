@@ -129,6 +129,7 @@ const baseJsonLd = {
                 utm_medium: a.utm_medium,
                 utm_campaign: a.utm_campaign,
                 fbclid: a.fbclid,
+                webdriver: navigator.webdriver === true,
               });
               if (navigator.sendBeacon) {
                 navigator.sendBeacon('/api/track', payload);
