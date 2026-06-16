@@ -5,13 +5,14 @@ import { services, groupLabels, type ServiceGroup } from '../../data/services';
 import Icon from '../../components/Icon.astro';
 
 const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
+const firstGroup = groups.find((g) => services.some((s) => s.group === g));
 ---
 
 <Base
   title="Áreas de práctica"
   description="Áreas de práctica: divorcios, pensión de alimentos, custodia, visitas, autorización de salida del país, violencia intrafamiliar, recursos contra Isapres y registro de marcas en INAPI."
 >
-  <section class="section">
+  <section class="section section--intro">
     <div class="container container--narrow">
       <span class="eyebrow">Áreas de práctica</span>
       <h1>Servicios y honorarios</h1>
@@ -27,7 +28,7 @@ const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
     const groupServices = services.filter((s) => s.group === group);
     if (groupServices.length === 0) return null;
     return (
-      <section class={`section ${group === 'hijos' || group === 'otros' ? 'section--cream-warm' : ''}`} id={group}>
+      <section class={`section ${group === 'hijos' || group === 'otros' ? 'section--cream-warm' : ''} ${group === firstGroup ? 'section--tight-top' : ''}`} id={group}>
         <div class="container">
           <div class="section-head">
             <span class="eyebrow">{groupLabels[group]}</span>
@@ -81,6 +82,15 @@ const groups: ServiceGroup[] = ['pareja', 'hijos', 'proteccion', 'otros'];
 </Base>
 
 <style>
+  /* Tighten the gap between the intro and the first group of services. */
+  .section--intro {
+    padding-bottom: clamp(16px, 2.5vw, 28px);
+  }
+
+  .section--tight-top {
+    padding-top: clamp(20px, 3vw, 36px);
+  }
+
   .section-head {
     margin-bottom: 32px;
   }
