@@ -123,21 +123,25 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     totals[r.event_type].unique += r.uniques;
   }
 
-  // Per-page unique visits (page_view only) for the pie chart. We pull the raw
-  // page_view rows and count distinct (path, ip, day) per normalized path —
-  // URL normalization is easier here than in SQL. Volume is tiny for this site.
+  // Pull page_view rows once and derive both the per-page pie and the audience
+  // breakdowns (geo, device, etc.) in a single pass. Volume is tiny for this site.
   let pages: Array<{ path: string; uniques: number; total: number }> = [];
+  const breakdowns: Record<string, Array<{ value: string; total: number; unique: number }>> = {};
   try {
     const pv = await env.DB.prepare(
-      "SELECT current_url, ip, day FROM events WHERE event_type = 'page_view' AND day BETWEEN ?1 AND ?2"
+      `SELECT current_url, ip, day, country, city, region, as_org, device, os, browser,
+              lang, referrer, utm_source, utm_medium, utm_campaign
+       FROM events WHERE event_type = 'page_view' AND day BETWEEN ?1 AND ?2`
     )
       .bind(from, to)
       .all();
-    const rows = (pv.results ?? []) as Array<{ current_url: string; ip: string; day: string }>;
+    const pvRows = (pv.results ?? []) as Array<Record<string, string | null>>;
+
+    // Per-page (pie)
     const seen = new Set<string>();
     const uniqueCounts = new Map<string, number>();
     const totalCounts = new Map<string, number>();
-    for (const r of rows) {
+    for (const r of pvRows) {
       const path = normalizePath(r.current_url);
       if (path === '/admin' || path.startsWith('/admin/')) continue;
       totalCounts.set(path, (totalCounts.get(path) ?? 0) + 1);
@@ -149,12 +153,73 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     pages = [...totalCounts.entries()]
       .map(([path, total]) => ({ path, total, uniques: uniqueCounts.get(path) ?? 0 }))
       .sort((a, b) => b.uniques - a.uniques);
+
+    // Audience breakdowns. Each dimension maps a row to a label.
+    const dims: Record<string, (r: Record<string, string | null>) => string> = {
+      country: (r) => r.country || '—',
+      city: (r) => r.city || '—',
+      device: (r) => r.device || '—',
+      os: (r) => r.os || '—',
+      browser: (r) => r.browser || '—',
+      lang: (r) => (r.lang || '—').split('-')[0],
+      source: (r) => sourceLabel(r),
+      campaign: (r) => r.utm_campaign || '(directo)',
+    };
+    const tot: Record<string, Map<string, number>> = {};
+    const uniqSeen: Record<string, Set<string>> = {};
+    const uniq: Record<string, Map<string, number>> = {};
+    for (const k of Object.keys(dims)) {
+      tot[k] = new Map();
+      uniq[k] = new Map();
+      uniqSeen[k] = new Set();
+    }
+    for (const r of pvRows) {
+      for (const k of Object.keys(dims)) {
+        const v = dims[k](r) || '—';
+        tot[k].set(v, (tot[k].get(v) ?? 0) + 1);
+        const ukey = `${v}|${r.ip}|${r.day}`;
+        if (!uniqSeen[k].has(ukey)) {
+          uniqSeen[k].add(ukey);
+          uniq[k].set(v, (uniq[k].get(v) ?? 0) + 1);
+        }
+      }
+    }
+    for (const k of Object.keys(dims)) {
+      breakdowns[k] = [...tot[k].entries()]
+        .map(([value, total]) => ({ value, total, unique: uniq[k].get(value) ?? 0 }))
+        .sort((a, b) => b.unique - a.unique || b.total - a.total)
+        .slice(0, 12);
+    }
   } catch {
     pages = [];
   }
 
   return Response.json(
-    { granularity, from, to, periods, eventTypes, series, totals, pages },
+    { granularity, from, to, periods, eventTypes, series, totals, pages, breakdowns },
     { headers: { 'Cache-Control': 'no-store' } }
   );
 };
+
+// Normalize the traffic source from utm_source / fbclid-derived value or referrer host.
+function sourceLabel(r: Record<string, string | null>): string {
+  const us = (r.utm_source || '').toLowerCase();
+  if (us) {
+    if (/facebook|fb|meta/.test(us)) return 'Facebook';
+    if (/insta|ig/.test(us)) return 'Instagram';
+    if (/google/.test(us)) return 'Google';
+    return r.utm_source as string;
+  }
+  let host = '';
+  try {
+    host = new URL(r.referrer || '').hostname.replace(/^www\./, '');
+  } catch {
+    host = '';
+  }
+  if (!host) return 'Directo';
+  if (/facebook\.com|fb\.com|fb\.me/.test(host)) return 'Facebook';
+  if (/instagram\.com/.test(host)) return 'Instagram';
+  if (/google\./.test(host)) return 'Google';
+  if (/t\.co|twitter\.com|x\.com/.test(host)) return 'Twitter/X';
+  if (/bing\./.test(host)) return 'Bing';
+  return host;
+}

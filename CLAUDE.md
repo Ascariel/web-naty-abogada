@@ -88,19 +88,26 @@ automatically.
 - `functions/api/track.ts` records the event in **D1**. `event_type` is validated against
   `^[a-z][a-z0-9_]{0,39}$`. Bots excluded by User-Agent. Stores the **raw client IP**
   (`CF-Connecting-IP`) for abuse/bot forensics; uniques are `COUNT(DISTINCT ip || day)`.
+  **Enrichment columns** (no extra permissions): geo + ISP from Cloudflare's `request.cf`
+  (`country`, `city`, `region`, `as_org`), `device`/`os`/`browser` parsed from the
+  User-Agent, plus `lang`, `referrer`, and `utm_source`/`utm_medium`/`utm_campaign`
+  (first-touch, sent by the beacon and/or parsed from the URL; an `fbclid` → `utm_source=facebook`).
+  Note: `request.cf` is empty in `wrangler pages dev` — geo only fills at the edge (prod).
 - `functions/api/stats.ts` returns, per event type, total + unique series aggregated by
   `day | week | month`, filterable by date.
 - `functions/_middleware.ts` gates `/admin` and `/api/stats` with HTTP Basic Auth
   (`admin` / `ADMIN_PASSWORD`). It **fails closed** if the secret isn't set.
-- `src/pages/admin.astro` is the dashboard (Chart.js via CDN): a summary table plus two charts
-  — "Eventos totales" and "Eventos únicos" — each with one line per event type. Schema lives in
-  `migrations/0001_init.sql` (the `events` table).
+- `src/pages/admin.astro` is the dashboard (Chart.js via CDN): KPI cards, one line chart per
+  event type (metric toggle), a "Páginas visitadas" pie, and an **Audiencia** section with
+  bar-list breakdowns (país, ciudad, dispositivo, SO, navegador, fuente, campaña, idioma).
+  Schema lives in `migrations/0001_init.sql` (the `events` table).
 
 **One-time setup — all in the Cloudflare dashboard** (Workers & Pages → the Pages project).
 The repo intentionally has **no `wrangler.toml`** (a committed one would override dashboard
 bindings), so the dashboard is the single source of truth:
 1. **D1 → Create database** named `naty-analytics`. Open its console and run the contents of
-   `migrations/0001_init.sql`.
+   `migrations/0001_init.sql`. If the `events` table already exists from an older version,
+   run `migrations/0002_add_enrichment.sql` instead (adds the enrichment columns).
 2. Project → **Settings → Functions → D1 database bindings** → add binding **`DB`** → `naty-analytics`
    (Production, and Preview if you want).
 3. Project → **Settings → Environment variables** → add (type *Secret*):

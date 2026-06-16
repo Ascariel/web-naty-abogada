@@ -63,6 +63,11 @@
 
       <section class="charts" id="charts"></section>
       <p class="empty card" id="empty" hidden>Sin datos en este rango.</p>
+
+      <section class="audience" id="audience" hidden>
+        <h2 class="audience-title">Audiencia</h2>
+        <div class="bd-grid" id="breakdowns"></div>
+      </section>
     </div>
 
     <script is:inline>
@@ -298,6 +303,39 @@
             wrap.appendChild(card);
             charts.push(makePieChart(card.querySelector('canvas'), labels, values, colors));
           }
+
+          renderBreakdowns(data);
+        }
+
+        const BD_LABELS = {
+          country: 'País', city: 'Ciudad', device: 'Dispositivo', os: 'Sistema operativo',
+          browser: 'Navegador', source: 'Fuente', campaign: 'Campaña', lang: 'Idioma',
+        };
+        const BD_ORDER = ['country', 'city', 'device', 'os', 'browser', 'source', 'campaign', 'lang'];
+        const COUNTRY = {
+          CL: 'Chile', AR: 'Argentina', PE: 'Perú', BO: 'Bolivia', CO: 'Colombia',
+          MX: 'México', US: 'Estados Unidos', ES: 'España', VE: 'Venezuela', BR: 'Brasil', EC: 'Ecuador',
+        };
+
+        function renderBreakdowns(data) {
+          const bd = data.breakdowns || {};
+          const wrap = $('breakdowns');
+          const present = BD_ORDER.filter((k) => (bd[k] || []).length);
+          $('audience').hidden = present.length === 0;
+          if (!present.length) { wrap.innerHTML = ''; return; }
+          const key = metric === 'unique' ? 'unique' : 'total';
+          wrap.innerHTML = present.map((k) => {
+            const rows = (bd[k] || []).filter((r) => r[key] > 0);
+            const max = Math.max.apply(null, rows.map((r) => r[key]).concat([1]));
+            const items = rows.map((r) => {
+              const label = k === 'country' ? (COUNTRY[r.value] || r.value) : r.value;
+              const pct = Math.round((r[key] / max) * 100);
+              return `<div class="bd-row"><span class="bd-bar" style="width:${pct}%"></span>` +
+                `<span class="bd-label" title="${label}">${label}</span>` +
+                `<span class="bd-val">${fmt(r[key])}</span></div>`;
+            }).join('');
+            return `<div class="card bd"><h3>${BD_LABELS[k]}</h3><div class="bd-rows">${items}</div></div>`;
+          }).join('');
         }
 
         // Controls
@@ -446,6 +484,17 @@
       .ch-meta strong { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
       .canvas-holder { position: relative; height: 260px; margin-top: 14px; }
       .empty { text-align: center; color: var(--muted); padding: 48px 0; font-size: 0.92rem; }
+
+      /* Audience breakdowns */
+      .audience { margin-top: 4px; }
+      .audience-title { color: var(--navy); font-size: 1.2rem; font-weight: 650; margin: 8px 0 16px; letter-spacing: -0.01em; }
+      .bd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(258px, 1fr)); gap: 16px; }
+      .bd h3 { margin: 0 0 12px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); font-weight: 600; }
+      .bd-rows { display: flex; flex-direction: column; gap: 6px; }
+      .bd-row { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 11px; font-size: 0.86rem; border-radius: 7px; overflow: hidden; }
+      .bd-bar { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(37, 99, 235, 0.10); z-index: 0; }
+      .bd-label { position: relative; z-index: 1; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .bd-val { position: relative; z-index: 1; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
       @media (max-width: 640px) {
         .page { padding: 28px 16px 60px; }
