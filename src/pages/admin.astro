@@ -15,6 +15,9 @@
     <meta name="color-scheme" content="light" />
     <title>Estadísticas — Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/es.js" defer></script>
   </head>
   <body>
     <div class="page">
@@ -298,11 +301,37 @@
           if (lastData) render(lastData); // no refetch — data has both metrics
         });
         $('apply').addEventListener('click', load);
+        // Fallback for native date inputs if flatpickr fails to load.
         ['from', 'to'].forEach((id) => $(id).addEventListener('change', load));
 
+        function initPickers() {
+          if (!window.flatpickr) return;
+          if (window.flatpickr.l10ns && window.flatpickr.l10ns.es) {
+            flatpickr.localize(window.flatpickr.l10ns.es);
+          }
+          ['from', 'to'].forEach((id) =>
+            flatpickr('#' + id, {
+              dateFormat: 'Y-m-d', // value sent to the API
+              altInput: true,
+              altFormat: 'd/m/Y', // shown to the user: day/month/year
+              allowInput: true,
+              locale: 'es',
+              onChange: () => load(),
+            })
+          );
+        }
+
+        let tries = 0;
         function start() {
-          if (window.Chart) { setChartDefaults(); load(); }
-          else setTimeout(start, 50);
+          tries++;
+          // Need Chart.js; wait up to ~2s for flatpickr, then fall back to native.
+          if (window.Chart && (window.flatpickr || tries > 40)) {
+            setChartDefaults();
+            initPickers();
+            load();
+          } else {
+            setTimeout(start, 50);
+          }
         }
         start();
       })();
@@ -353,12 +382,12 @@
       }
       .field { display: flex; flex-direction: column; gap: 6px; }
       .field > label { font-size: 0.7rem; font-weight: 600; color: var(--faint); text-transform: uppercase; letter-spacing: 0.06em; }
-      .field input[type='date'] {
+      .field input {
         font: inherit; font-size: 0.9rem; padding: 9px 12px; border: 1px solid var(--line);
         border-radius: 10px; background: #fff; color: var(--ink); min-height: 40px;
         transition: border-color 0.15s, box-shadow 0.15s;
       }
-      .field input[type='date']:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+      .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
       .seg { display: inline-flex; background: #eef1f5; border-radius: 10px; padding: 3px; gap: 2px; }
       .seg button {
         font: inherit; font-size: 0.85rem; font-weight: 600; border: 0; background: transparent;
@@ -408,7 +437,7 @@
         .page-head { flex-direction: column; }
         .metric { align-items: flex-start; }
         .toolbar { gap: 12px; }
-        .field, .field input[type='date'] { width: 100%; }
+        .field, .field input { width: 100%; }
         .charts { grid-template-columns: 1fr; }
         .canvas-holder { height: 240px; }
       }
