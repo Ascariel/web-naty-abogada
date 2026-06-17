@@ -23,14 +23,18 @@ import Icon from '../components/Icon.astro';
   <section class="section section--cream-warm" style="padding-top: 24px;">
     <div class="container container--narrow">
       <div class="contact-grid">
-        <a class="contact-card" href={whatsappLink()} target="_blank" rel="noopener">
+        <div class="contact-card">
           <span class="contact-icon"><Icon name="message" size={24} /></span>
           <div>
             <h3>WhatsApp</h3>
             <p>Respuesta personalizada en horario hábil</p>
-            <span class="contact-action">Iniciar conversación →</span>
+            <a class="contact-action" href={whatsappLink()} target="_blank" rel="noopener">Iniciar conversación →</a>
+            <p class="contact-alt">
+              ¿Sin WhatsApp? Envíame un mensaje de texto:
+              <a href={`tel:+${site.whatsappNumber}`}>{site.phoneDisplay}</a>
+            </p>
           </div>
-        </a>
+        </div>
 
         <a class="contact-card" href={`mailto:${site.email}`}>
           <span class="contact-icon"><Icon name="mail" size={24} /></span>
@@ -147,7 +151,25 @@ import Icon from '../components/Icon.astro';
     color: var(--gold);
     font-weight: 500;
     font-size: 0.9rem;
+    display: inline-block;
   }
+
+  a.contact-action:hover { text-decoration: underline; }
+
+  .contact-alt {
+    margin: 12px 0 0 !important;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.84rem !important;
+  }
+
+  .contact-alt a {
+    color: var(--navy);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .contact-alt a:hover { color: var(--gold); }
 
   .small { font-size: 0.84rem; }
 

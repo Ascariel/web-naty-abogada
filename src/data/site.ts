@@ -5,8 +5,9 @@ export const site = {
   city: 'Santiago, Chile',
   domain: 'nataliavallejos.cl',
   whatsappNumber: '56936387240',
+  phoneDisplay: '+56 9 3638 7240',
   whatsappDefaultMessage:
-    'Hola Natalia, me gustaría una orientación legal. ¿Podrías ayudarme?',
+    'Hola Natalia, vi tu web y tengo unas dudas, me gustaría una orientación legal. ¿Podrías ayudarme?',
   email: 'nataliaandreavallejos@gmail.com',
   // TODO: replace with real address
   officeAddress: 'Atención en Santiago · Chile',

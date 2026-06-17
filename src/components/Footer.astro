@@ -28,6 +28,7 @@ const year = new Date().getFullYear();
       <h4>Contacto</h4>
       <ul>
         <li><a href={whatsappLink()} target="_blank" rel="noopener">WhatsApp</a></li>
+        <li><a href={`tel:+${site.whatsappNumber}`}>{site.phoneDisplay}</a></li>
         <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
         {site.linkedin && (
           <li><a href={site.linkedin} target="_blank" rel="noopener">LinkedIn</a></li>
