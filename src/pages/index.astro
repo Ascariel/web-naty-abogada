@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     q: '¿Cuánto cuesta una primera consulta?',
-    a: 'La primera consulta tiene un valor referencial de $15.000 (60 minutos). En casos de violencia intrafamiliar la primera orientación es siempre gratuita.',
+    a: 'La primera consulta tiene un valor referencial de $20.000 (60 minutos). En casos de violencia intrafamiliar la primera orientación es siempre gratuita.',
   },
   {
     q: '¿Aceptan pago en cuotas?',
@@ -189,7 +189,6 @@ const faqs = [
             <span class="service-icon" aria-hidden="true"><Icon name={s.icon} size={26} /></span>
             <h3>{s.shortTitle ?? s.title}</h3>
             <p>{s.summary}</p>
-            <span class="service-price">{s.priceRange}</span>
             <span class="service-link">Conoce más →</span>
           </a>
         ))}
@@ -534,14 +533,6 @@ const faqs = [
     font-size: 0.95rem;
     margin-bottom: 16px;
     flex-grow: 1;
-  }
-
-  .service-price {
-    display: inline-block;
-    color: var(--navy);
-    font-weight: 600;
-    font-size: 0.92rem;
-    margin-bottom: 8px;
   }
 
   .service-link {

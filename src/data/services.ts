@@ -8,7 +8,6 @@ export interface Service {
   icon: string; // name of a line-SVG icon in src/components/Icon.astro
   summary: string;
   description: string[];
-  priceRange: string;
   pricingModel: string;
   includes?: string[];
   featured?: boolean;
@@ -35,7 +34,6 @@ export const services: Service[] = [
       'El divorcio de mutuo acuerdo es la vía más rápida y económica para terminar un matrimonio en Chile. Requiere que ambas partes hayan estado separadas por al menos 1 año y que firmen un Acuerdo Completo y Suficiente que regule alimentos, cuidado personal, régimen de visitas y régimen de bienes.',
       'Te acompaño en la redacción del acuerdo, presento la demanda en el Tribunal de Familia correspondiente y comparezco contigo a la audiencia. En la mayoría de los casos, la sentencia se obtiene en 2 a 4 meses.',
     ],
-    priceRange: 'Desde $400.000',
     pricingModel: 'Suma alzada · pago en cuotas disponible',
     includes: [
       'Redacción del Acuerdo Completo y Suficiente',
@@ -57,7 +55,6 @@ export const services: Service[] = [
       'El divorcio unilateral procede cuando una sola parte desea divorciarse y existe un cese efectivo de la convivencia por al menos 3 años. Es un juicio contencioso que requiere acreditar el cese mediante testigos, documentos o cese previamente notificado.',
       'Incluye opcionalmente la solicitud de compensación económica si correspondiere. Manejamos casos con o sin compensación, y con cónyuges que residen fuera de Chile.',
     ],
-    priceRange: 'Desde $550.000',
     pricingModel: 'Suma alzada (con compensación: cuota litis 20% adicional)',
     featured: true,
   },
@@ -72,7 +69,6 @@ export const services: Service[] = [
       'El divorcio culposo procede cuando uno de los cónyuges incurre en una falta grave imputable: violencia intrafamiliar, abandono, infidelidad reiterada, atentados contra la integridad física o psíquica.',
       'No requiere acreditar tiempo de cese de convivencia. Es un juicio más complejo, donde se rinde prueba sobre los hechos. Suele combinarse con medidas de protección y solicitud de compensación económica.',
     ],
-    priceRange: 'Desde $700.000',
     pricingModel: 'Suma alzada según complejidad',
   },
   {
@@ -86,7 +82,6 @@ export const services: Service[] = [
       'La notificación de cese efectivo de convivencia es una gestión preparatoria que da fecha cierta al término de la vida en común. Es indispensable cuando se pretende divorciarse unilateralmente más adelante, pues fija el inicio del plazo de 3 años.',
       'Se realiza ante notario o por gestión voluntaria en tribunales. Es una gestión rápida y económica.',
     ],
-    priceRange: 'Desde $150.000',
     pricingModel: 'Suma alzada',
   },
 
@@ -102,7 +97,6 @@ export const services: Service[] = [
       'Si el padre o madre no contribuye al sustento de los hijos, la ley te respalda. Demando la pensión de alimentos en el Tribunal de Familia, gestiono la mediación previa obligatoria y obtengo una pensión provisoria desde el día de presentada la demanda.',
       'La pensión se fija como porcentaje del ingreso del alimentante o como monto fijo en UTM. Incluye además la inscripción en el Registro Nacional de Deudores si hay incumplimiento.',
     ],
-    priceRange: 'Desde $300.000',
     pricingModel: 'Suma alzada · pago en cuotas',
     includes: [
       'Mediación previa obligatoria',
@@ -124,7 +118,6 @@ export const services: Service[] = [
       'La pensión de alimentos no es inmutable. Si los ingresos del alimentante aumentaron significativamente, las necesidades del hijo crecieron, o el alimentante perdió su trabajo, procede solicitar la revisión.',
       'También puedo solicitar el cese cuando el hijo cumple los requisitos (mayoría de edad sin estudiar, autonomía económica, etc.).',
     ],
-    priceRange: 'Desde $250.000',
     pricingModel: 'Suma alzada',
   },
   {
@@ -139,7 +132,6 @@ export const services: Service[] = [
       'El cuidado personal —antes llamado tuición— es la atribución legal sobre con quién vive el niño. Por defecto, en separaciones, lo tiene quien estaba al cuidado al momento de la ruptura, pero puede demandarse para modificarlo cuando el bienestar del niño lo justifica.',
       'Trabajo casos contenciosos y declarativos, incluyendo evaluaciones psicosociales y participación de los niños en audiencia reservada con el juez.',
     ],
-    priceRange: 'Desde $600.000',
     pricingModel: 'Suma alzada',
     featured: true,
   },
@@ -155,7 +147,6 @@ export const services: Service[] = [
       'La relación directa y regular —comúnmente "régimen de visitas"— es un derecho del niño y un deber del padre o madre que no tiene el cuidado personal. Cuando no hay acuerdo, debe fijarse judicialmente.',
       'Incluye fines de semana alternados, vacaciones, fechas especiales y videollamadas si la distancia lo amerita. También gestiono la modificación del régimen vigente y su cumplimiento forzado cuando se obstaculiza.',
     ],
-    priceRange: 'Desde $350.000',
     pricingModel: 'Suma alzada',
   },
   {
@@ -169,7 +160,6 @@ export const services: Service[] = [
       'Si necesitas viajar con tu hijo al extranjero y el otro padre no autoriza el permiso notarial requerido (o no es ubicable), puedo solicitar la autorización judicial en el Tribunal de Familia.',
       'Aplicable también para residencia permanente en el extranjero, viajes de estudios o emergencias médicas. El plazo de tramitación depende del tribunal, en general entre 1 y 3 meses.',
     ],
-    priceRange: 'Desde $250.000',
     pricingModel: 'Suma alzada',
   },
   {
@@ -183,7 +173,6 @@ export const services: Service[] = [
       'Cuando un padre no quiere reconocer voluntariamente a su hijo, la ley permite demandar la paternidad. La prueba reina es el examen de ADN, que el tribunal puede ordenar y cuya negativa injustificada constituye presunción grave.',
       'Una vez reconocida la paternidad, el hijo tiene derecho a alimentos, herencia y al apellido paterno. Trabajo también casos de impugnación o nulidad de paternidad cuando corresponda.',
     ],
-    priceRange: 'Desde $400.000',
     pricingModel: 'Suma alzada',
   },
 
@@ -199,7 +188,6 @@ export const services: Service[] = [
       'En casos de violencia intrafamiliar el tiempo es crítico. Solicito medidas cautelares de protección (prohibición de acercamiento, salida del agresor del hogar común, abandono inmediato), denuncio ante el Ministerio Público cuando configura delito, y represento a la víctima durante todo el proceso.',
       'La primera orientación en casos de VIF es siempre gratuita. Mi compromiso es darte una respuesta clara dentro de las 24 horas siguientes a tu consulta.',
     ],
-    priceRange: 'Primera orientación gratuita · representación desde $250.000',
     pricingModel: 'Suma alzada (representación) · pago en cuotas',
     featured: true,
   },
@@ -215,7 +203,6 @@ export const services: Service[] = [
       'Las medidas de protección proceden cuando un NNA es víctima de negligencia parental, abandono, maltrato o cualquier forma de vulneración de sus derechos. Pueden solicitarse por familiares, vecinos, profesores o cualquier persona que tome conocimiento.',
       'El tribunal puede ordenar tratamientos psicológicos, traslado de cuidado a otro adulto responsable, ingreso a residencias o programas, y supervisión continua del caso.',
     ],
-    priceRange: 'Desde $300.000',
     pricingModel: 'Suma alzada',
   },
 
@@ -233,7 +220,6 @@ export const services: Service[] = [
       'La Ley 21.331 reconoce el derecho a la salud mental en igualdad con la salud física. Sin embargo, las Isapres siguen imponiendo topes anuales a las prestaciones psicológicas y psiquiátricas, lo que es contrario al espíritu de la ley.',
       'A través de un recurso de protección ante la Corte de Apelaciones, podemos obtener la eliminación de esos topes y la cobertura íntegra de tu tratamiento. El plazo es breve (3 a 6 meses) y la tasa de éxito en cortes es muy alta.',
     ],
-    priceRange: 'Desde $65.000 pago único',
     pricingModel: 'Mixto · sin costo inicial disponible',
     featured: true,
   },
@@ -249,8 +235,6 @@ export const services: Service[] = [
       'El registro de marca te otorga el derecho exclusivo de usar tu nombre comercial, logo o eslogan en Chile por 10 años renovables. Sin él, cualquiera puede registrar tu marca antes que tú.',
       'El proceso incluye el estudio de factibilidad (que la marca esté disponible), la solicitud ante INAPI, la publicación en el Diario Oficial, la respuesta a oposiciones si las hubiere, y la obtención del título de registro.',
     ],
-    priceRange:
-      'Honorarios desde $100.000 + tasas INAPI ~$220.000 (3 UTM por clase)',
     pricingModel: 'Suma alzada por etapas · 1ra cuota al ingreso, 2da al registro',
     includes: [
       'Estudio de factibilidad de marca',

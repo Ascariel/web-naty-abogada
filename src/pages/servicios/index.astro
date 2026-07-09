@@ -17,9 +17,9 @@ const firstGroup = groups.find((g) => services.some((s) => s.group === g));
       <span class="eyebrow">Servicios</span>
       <h1>Servicios y Honorarios</h1>
       <p class="lead">
-        Estos son los servicios que ofrezco, con rangos referenciales de
-        honorarios. Cada caso se evalúa de forma personalizada y recibe una
-        propuesta cerrada por escrito antes de iniciar.
+        Estos son los servicios que ofrezco. Cada caso se evalúa de forma
+        personalizada y recibe una propuesta cerrada por escrito antes de
+        iniciar.
       </p>
     </div>
   </section>
@@ -44,7 +44,6 @@ const firstGroup = groups.find((g) => services.some((s) => s.group === g));
                 </div>
                 <p>{s.summary}</p>
                 <div class="service-card-foot">
-                  <span class="service-price">{s.priceRange}</span>
                   <span class="service-link">Más información →</span>
                 </div>
               </a>
@@ -59,11 +58,10 @@ const firstGroup = groups.find((g) => services.some((s) => s.group === g));
     <div class="container container--narrow">
       <div class="note">
         <p>
-          <strong>Nota sobre los honorarios.</strong> Los valores indicados
-          son referenciales. El monto final se ajusta a la complejidad de
-          cada caso y se acuerda por escrito antes de comenzar. Los
-          honorarios pueden pagarse hasta en 3 cuotas sin interés con
-          tarjeta de crédito o transferencia bancaria.
+          <strong>Nota sobre los honorarios.</strong> Los honorarios se
+          definen caso a caso, según la complejidad de cada situación, y se
+          acuerdan por escrito antes de comenzar. Pueden pagarse hasta en 3
+          cuotas sin interés con tarjeta de crédito o transferencia bancaria.
         </p>
         <p style="margin-bottom: 0;">
           <strong>Tasas y costos de tribunales</strong> (notarías, INAPI,
@@ -153,12 +151,6 @@ const firstGroup = groups.find((g) => services.some((s) => s.group === g));
     border-top: 1px solid var(--border);
     flex-wrap: wrap;
     gap: 8px;
-  }
-
-  .service-price {
-    color: var(--navy);
-    font-weight: 600;
-    font-size: 0.92rem;
   }
 
   .service-link {

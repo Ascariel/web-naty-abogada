@@ -42,12 +42,9 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
 
       <div class="price-card">
         <div>
-          <span class="muted">Honorarios referenciales</span>
-          <p class="price-value">{service.priceRange}</p>
-        </div>
-        <div>
-          <span class="muted">Modalidad</span>
+          <span class="muted">Modalidad de honorarios</span>
           <p class="model-value">{service.pricingModel}</p>
+          <p class="price-note">Los honorarios se definen caso a caso, según la complejidad de tu situación. Recibirás una propuesta cerrada y por escrito antes de comenzar.</p>
         </div>
       </div>
 
@@ -91,7 +88,6 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
               <span class="service-icon" aria-hidden="true"><Icon name={s.icon} size={24} /></span>
               <h3>{s.shortTitle ?? s.title}</h3>
               <p>{s.summary}</p>
-              <span class="service-price">{s.priceRange}</span>
             </a>
           ))}
         </div>
@@ -140,9 +136,6 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
     border-radius: var(--radius-lg);
     padding: 24px 28px;
     margin-block: 32px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
   }
 
   .price-card .muted {
@@ -151,18 +144,16 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
     letter-spacing: 0.1em;
   }
 
-  .price-value {
-    font-family: var(--serif);
-    font-size: 1.6rem;
-    color: var(--navy);
-    font-weight: 600;
-    margin: 4px 0 0;
-  }
-
   .model-value {
     font-size: 1.05rem;
     color: var(--charcoal);
     margin: 4px 0 0;
+  }
+
+  .price-note {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin: 12px 0 0;
   }
 
   .prose p {
@@ -268,14 +259,7 @@ const customMessage = `Hola Natalia, me interesa el servicio "${service.title}".
     margin-bottom: 12px;
   }
 
-  .service-price {
-    color: var(--navy);
-    font-weight: 600;
-    font-size: 0.88rem;
-  }
-
   @media (max-width: 600px) {
-    .price-card { grid-template-columns: 1fr; }
     .title-row { flex-direction: column; align-items: flex-start; gap: 12px; }
   }
 </style>
